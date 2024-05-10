@@ -17,7 +17,7 @@ void setup() {
 }
 
 void loop(){
-    if(mmwave.fetch() > 0){
+    if(mmwave.fetch(HeartRateType) > 0){
         mmwave.print_data();
     }
 }

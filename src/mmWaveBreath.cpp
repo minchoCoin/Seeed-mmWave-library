@@ -9,9 +9,11 @@
  * @copyright © 2024, Seeed Studio
  */
 
-#include "mmWaveBreath.h"
+#include "mmWaveBreath.hpp"
+#include <utility>
+#include <vector>
 
-bool validateChecksum(const uint8_t* data, size_t len, uint8_t expected_checksum) {
+bool validateChecksum(const uint8_t *data, size_t len, uint8_t expected_checksum) {
     unsigned char ret = 0;
     for (int i = 0; i < len; i++)
         ret = ret ^ data[i];
@@ -30,13 +32,13 @@ bool validateChecksum(const uint8_t* data, size_t len, uint8_t expected_checksum
  * @param buffer
  * @return size_t
  */
-size_t expectedFrameLength(const std::vector<uint8_t>& buffer) {
+size_t expectedFrameLength(const std::vector<uint8_t> &buffer) {
     // Extract the length from the buffer
-    size_t len = (buffer[3] << 8) | buffer[4]; // Adjust index based on your protocol
+    size_t len = (buffer[3] << 8) | buffer[4];  // Adjust index based on your protocol
     return SIZE_FRAME_HEADER + len + SIZE_DATA_CKSUM;
 }
 
-mmWaveBreath::mmWaveBreath(HardwareSerial* serial, uint32_t baud, uint32_t wait_delay)
+mmWaveBreath::mmWaveBreath(HardwareSerial *serial, uint32_t baud, uint32_t wait_delay)
     : _baud(baud), _wait_delay(wait_delay) {
     this->_serial = serial;
 }
@@ -66,127 +68,228 @@ int mmWaveBreath::available() {
     return 0;
 }
 
-int mmWaveBreath::read(char* data, int length) {
+int mmWaveBreath::read(char *data, int length) {
     if (_serial) {
         return _serial->readBytes(data, length);
     }
     return 0;
 }
 
-int mmWaveBreath::fetch(uint32_t timeout) {
-    uint32_t start_time = millis();
-    bool startFrame = false;
+float mmWaveBreath::extractFloat(const uint8_t *bytes) {
+    // Assumes system is little endian; you might need to adjust this depending on your architecture
+    return *reinterpret_cast<const float *>(bytes);
+}
+uint32_t mmWaveBreath::extractU32(const uint8_t *bytes) {
+    // Assumes system is little endian; you might need to adjust this depending on your architecture
+    return *reinterpret_cast<const uint32_t *>(bytes);
+}
+
+int mmWaveBreath::fetch(uint32_t mask, uint32_t timeout) {
+    uint32_t expire_time = millis() + timeout;
+    bool startFrame      = false;
     std::vector<uint8_t> frameBuffer;
-    while (millis() - start_time < timeout) {
-        while (_serial->available()) {
+
+    while (millis() < expire_time) {
+        if (_serial->available()) {
             uint8_t byte = _serial->read();
             if (byte == SOF_BYTE) {
                 startFrame = true;
                 frameBuffer.clear();
+            }
+            if (startFrame) {
                 frameBuffer.push_back(byte);
-            } else if (startFrame) {
-                frameBuffer.push_back(byte);
-                if (frameBuffer.size() >= SIZE_FRAME_HEADER) { // 得到帧头，开始解析
-                    // Assuming fixed length frames or you need to parse length and handle
-                    // accordingly
-                    if (frameBuffer.size() ==
-                        expectedFrameLength(frameBuffer)) { // 如果长度不够，则继续读取
-                        processFrame(frameBuffer.data(), frameBuffer.size()); // 长度足够，开始解析
-                        startFrame = false;
-                    }
+                if (frameBuffer.size() >= SIZE_FRAME_HEADER && frameBuffer.size() == expectedFrameLength(frameBuffer)) {
+                    processFrame(frameBuffer.data(), frameBuffer.size(), mask);
+                    startFrame = false;
                 }
             }
         }
     }
-    // Here you might want to return the number of frames processed, or handle differently
-    return frameQueue.size();
+    return dataItems.size();
 }
 
-void printItem(const mmwave_frame& frame) {
-
-    // for (int i = 0; i < frame.len; i++) {
-    //     Serial.printf("%02x ", frame.frame[i]);
-    // }
-    // Serial.println();
-    switch (frame.type) {
-    case TypeHeartBreath::HeartBreathPhaseType: {
-        HeartBreath* hb = reinterpret_cast<HeartBreath*>(frame.frame);
-        if (hb != nullptr) { // 确保指针非空
-            // Serial.printf("breath_phase: %f, heart_phase: %f\n", *(float *)&hb->breath_phase,
-            //               *(float *)&hb->heart_phase);
-        }
-        break;
-    }
-    case TypeHeartBreath::BreathRateType: {
-        BreathRate* hb = reinterpret_cast<BreathRate*>(frame.frame);
-        if (hb != nullptr) { // 确保指针非空
-            Serial.printf("breath_rate: %f\n", *(float *)&hb->breath_rate);
-        }
-        break;
-    }
-    case TypeHeartBreath::HeartRateType: {
-        HeartRate* hb = reinterpret_cast<HeartRate*>(frame.frame);
-        if (hb != nullptr) { // 确保指针非空
-            // Serial.printf("heart_rate: %f\n", *(float *)&hb->heart_rate);
-        }
-        break;
-    }
-    case TypeHeartBreath::HeartBreathDistanceType: {
-        HeartBreathDistance* hb = reinterpret_cast<HeartBreathDistance*>(frame.frame);
-        if (hb != nullptr) { // 确保指针非空
-            // Serial.printf("range: %f\n", *(float *)&hb->range);
-        }
-        break;
-    }
-    default:
-        break;
-    }
-}
-
-void mmWaveBreath::processFrame(const uint8_t* frame_btyes, size_t len) {
+void mmWaveBreath::processFrame(const uint8_t *frame_bytes, size_t len, uint32_t mask) {
     if (len < SIZE_FRAME_HEADER)
-        return; // Not enough data to process header
-    uint16_t id = (frame_btyes[1] << 8) | frame_btyes[2];
-    uint16_t data_len = (frame_btyes[3] << 8) | frame_btyes[4];
-    uint16_t type = (frame_btyes[5] << 8) | frame_btyes[6];
-    uint8_t head_cksum = frame_btyes[7];
-    // Validate header checksum
-    if (!validateChecksum(frame_btyes, SIZE_FRAME_HEADER - SIZE_DATA_CKSUM, head_cksum))
+        return;  // Not enough data to process header
+
+    uint16_t type = (frame_bytes[5] << 8) | frame_bytes[6];
+
+    if (!(TypeHeartBreathToMask(static_cast<TypeHeartBreath>(type)) & mask)) {
         return;
-    // Check if the remaining bytes are enough for data + data checksum
-    if (len < SIZE_FRAME_HEADER + data_len + SIZE_DATA_CKSUM)
+    }
+
+    uint16_t id        = (frame_bytes[1] << 8) | frame_bytes[2];
+    uint16_t data_len  = (frame_bytes[3] << 8) | frame_bytes[4];
+    uint8_t head_cksum = frame_bytes[7];
+    uint8_t data_cksum = frame_bytes[SIZE_FRAME_HEADER + data_len];
+
+    // 校验和验证
+    if (!validateChecksum(frame_bytes, SIZE_FRAME_HEADER - SIZE_DATA_CKSUM, head_cksum) ||
+        !validateChecksum(&frame_bytes[SIZE_FRAME_HEADER], data_len, data_cksum) ||
+        data_len < 0 || data_len > 10) {
         return;
-    // Validate data checksum
-    uint8_t data_cksum = frame_btyes[SIZE_FRAME_HEADER + data_len];
-    if (!validateChecksum(&frame_btyes[SIZE_FRAME_HEADER], data_len, data_cksum))
-        return;
-    // Allocate memory for the entire frame
-    mmwave_frame newFrame;
-    newFrame.frame = new uint8_t[len];
-    memcpy(newFrame.frame, frame_btyes, len);
-    newFrame.type = static_cast<TypeHeartBreath>(type);
-    newFrame.len = len;
-    // Store the frame in the vector
-    frameQueue.push(newFrame);
+    }
+
+    BaseData *newData = nullptr;
+    // 根据类型创建对应的数据对象
+    switch (static_cast<TypeHeartBreath>(type)) {
+        case HeartBreathPhaseType:
+            newData = new HeartBreath(extractFloat(frame_bytes + SIZE_FRAME_HEADER),
+                                      extractFloat(frame_bytes + SIZE_FRAME_HEADER + sizeof(float)),
+                                      extractFloat(frame_bytes + SIZE_FRAME_HEADER + 2 * sizeof(float)));
+            break;
+        case BreathRateType:
+            newData = new BreathRate(extractFloat(frame_bytes + SIZE_FRAME_HEADER));
+            break;
+        case HeartRateType:
+            newData = new HeartRate(extractFloat(frame_bytes + SIZE_FRAME_HEADER));
+            break;
+        case HeartBreathDistanceType:
+            newData = new HeartBreathDistance(extractU32(frame_bytes + SIZE_FRAME_HEADER),
+                                              extractFloat(frame_bytes + SIZE_FRAME_HEADER + sizeof(uint32_t)));
+            break;
+        default:
+            return;
+    }
+
+    if (newData) {
+        if (dataItems.size() >= MAX_QUEUE_SIZE) {
+            while (!dataItems.empty()) {
+                delete dataItems.front();
+                dataItems.pop();
+            }
+        }
+        dataItems.push(newData);
+    }
 }
 
-/**
- * @brief 在这里进行数据的显示
- *
- * @return int
- */
+// void mmWaveBreath::processFrame( const uint8_t *frame_bytes, size_t len ) {
+//     if ( len < SIZE_FRAME_HEADER )
+//         return;  // Not enough data to process header
+
+//     uint16_t id        = ( frame_bytes[1] << 8 ) | frame_bytes[2];
+//     uint16_t data_len  = ( frame_bytes[3] << 8 ) | frame_bytes[4];
+//     uint16_t type      = ( frame_bytes[5] << 8 ) | frame_bytes[6];
+//     uint8_t head_cksum = frame_bytes[7];
+
+//     // Validate header checksum
+//     if ( !validateChecksum( frame_bytes, SIZE_FRAME_HEADER - SIZE_DATA_CKSUM, head_cksum ) )
+//         return;
+
+//     // Check if the remaining bytes are enough for data + data checksum
+//     if ( len < SIZE_FRAME_HEADER + data_len + SIZE_DATA_CKSUM )
+//         return;
+
+//     // Validate data checksum
+//     uint8_t data_cksum = frame_bytes[SIZE_FRAME_HEADER + data_len];
+//     if ( !validateChecksum( &frame_bytes[SIZE_FRAME_HEADER], data_len, data_cksum ) )
+//         return;
+
+//     if ( data_len < 0 || data_len > 20 ) {
+//         return;
+//     }
+
+//     // Depending on the frame type, create the corresponding object
+//     BaseData *newData = nullptr;
+//     switch ( static_cast<TypeHeartBreath>( type ) ) {
+//         case HeartBreathPhaseType:
+//             newData = new HeartBreath(
+//                 extractFloat( frame_bytes + SIZE_FRAME_HEADER ),
+//                 extractFloat( frame_bytes + SIZE_FRAME_HEADER + sizeof( float ) ),
+//                 extractFloat( frame_bytes + SIZE_FRAME_HEADER + 2 * sizeof( float ) ) );
+//             break;
+//         case BreathRateType:
+//             newData = new BreathRate(
+//                 extractFloat( frame_bytes + SIZE_FRAME_HEADER ) );
+//             break;
+//         case HeartRateType:
+//             newData = new HeartRate(
+//                 extractFloat( frame_bytes + SIZE_FRAME_HEADER ) );
+//             break;
+//         case HeartBreathDistanceType:
+//             newData = new HeartBreathDistance(
+//                 extractU32( frame_bytes + SIZE_FRAME_HEADER ),
+//                 extractFloat( frame_bytes + SIZE_FRAME_HEADER + sizeof( uint32_t ) ) );
+//             break;
+//         default:
+//             return;  // Unknown type or do nothing
+//     }
+
+//     if ( newData ) {
+//         if ( dataItems.size() >= MAX_QUEUE_SIZE ) {
+//             while ( !dataItems.empty() ) {
+//                 delete dataItems.front();  // 删除指向的对象
+//                 dataItems.pop();           // 从队列中移除指针
+//             }
+//         }
+//         dataItems.push( newData );
+//     }
+// }
+
+// void printItem(const mmwave_frame &frame)
+// {
+
+//     // for (int i = 0; i < frame.len; i++) {
+//     //     Serial.printf("%02x ", frame.frame[i]);
+//     // }
+//     // Serial.println();
+//     switch (frame.type)
+//     {
+//     case TypeHeartBreath::HeartBreathPhaseType:
+//     {
+//         HeartBreath *hb = reinterpret_cast<HeartBreath *>(frame.frame);
+//         if (hb != nullptr)
+//         { // 确保指针非空
+//             // Serial.printf("breath_phase: %f, heart_phase: %f\n", *(float *)&hb->breath_phase,
+//             //               *(float *)&hb->heart_phase);
+//         }
+//         break;
+//     }
+//     case TypeHeartBreath::BreathRateType:
+//     {
+//         BreathRate *hb = reinterpret_cast<BreathRate *>(frame.frame);
+//         if (hb != nullptr)
+//         { // 确保指针非空
+//             Serial.printf("breath_rate: %f\n", *(float *)&hb->breath_rate);
+//         }
+//         break;
+//     }
+//     case TypeHeartBreath::HeartRateType:
+//     {
+//         HeartRate *hb = reinterpret_cast<HeartRate *>(frame.frame);
+//         if (hb != nullptr)
+//         { // 确保指针非空
+//             // Serial.printf("heart_rate: %f\n", *(float *)&hb->heart_rate);
+//         }
+//         break;
+//     }
+//     case TypeHeartBreath::HeartBreathDistanceType:
+//     {
+//         HeartBreathDistance *hb = reinterpret_cast<HeartBreathDistance *>(frame.frame);
+//         if (hb != nullptr)
+//         { // 确保指针非空
+//             // Serial.printf("range: %f\n", *(float *)&hb->range);
+//         }
+//         break;
+//     }
+//     default:
+//         break;
+//     }
+// }
+
 void mmWaveBreath::print_data(size_t len) {
-    if (frameQueue.size() < 0)
+    if (dataItems.size() < 0)
         return;
 
-    int item_count = frameQueue.size();
+    int item_count = dataItems.size();
     if (len > item_count)
         len = item_count;
 
     // Print the first frame
     for (int i = 0; i < len; i++) {
-        mmwave_frame frame = frameQueue.front();
-        frameQueue.pop();
-        printItem(frame);
+        BaseData *item = dataItems.front();
+        dataItems.pop();  // Remove the item from the queue
+        item->print();
+        delete item;
     }
 }

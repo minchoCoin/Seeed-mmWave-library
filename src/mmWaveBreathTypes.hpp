@@ -11,51 +11,27 @@
 
 #ifndef MMWAVEBREATHTYPES_H
 #define MMWAVEBREATHTYPES_H
+#define _VERSION_MMWAVEBREATH_0_0_1 "0.0.9"
 #include <Arduino.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// Macro to define an enumeration and its corresponding mask
-#define DEFINE_TYPE(name, enumValue, maskShift) \
-    name        = enumValue,                    \
-    MASK_##name = (1 << maskShift)
-
-typedef enum TypeHeartBreath {
-    DEFINE_TYPE(HeartBreathPhaseType, 0x0A13, 0),
-    DEFINE_TYPE(BreathRateType, 0x0A14, 1),
-    DEFINE_TYPE(HeartRateType, 0x0A15, 2),
-    DEFINE_TYPE(HeartBreathDistanceType, 0x0A16, 3)
-} TypeHeartBreath;
-
-uint32_t TypeHeartBreathToMask(TypeHeartBreath type) {
-    switch (type) {
-        case HeartBreathPhaseType:
-            return MASK_HeartBreathPhaseType;
-        case BreathRateType:
-            return MASK_BreathRateType;
-        case HeartRateType:
-            return MASK_HeartRateType;
-        case HeartBreathDistanceType:
-            return MASK_HeartBreathDistanceType;
-        default:
-            return 0;
-    }
-}
-
-#ifdef __cplusplus
-} /*extern "C"*/
-#endif
-
+enum class TypeHeartBreath : uint16_t {
+    TypeHeartBreathPhase    = 0x0A13,
+    TypeBreathRate          = 0x0A14,
+    TypeHeartRate           = 0x0A15,
+    TypeHeartBreathDistance = 0x0A16
+};
 
 class BaseData {
   public:
     virtual ~BaseData()                     = default;
-    virtual void print() const              = 0;
     virtual TypeHeartBreath getType() const = 0;
-    virtual uint32_t getMask() const        = 0;
+    bool isValid() const { return valid; }
+    bool isUpdated() const { return updated; }
+
+  protected:
+    mutable bool valid   = false;
+    mutable bool updated = false;
 };
 
 class HeartBreath : public BaseData {
@@ -64,16 +40,27 @@ class HeartBreath : public BaseData {
     float heart_phase;
 
   public:
-    HeartBreath(float tp, float bp, float hp) : total_phase(tp), breath_phase(bp), heart_phase(hp) {}
-    void print() const override {
-        Serial.printf("Total Phase: %f, Breath Phase: %f, Heart Phase: %f\n", total_phase, breath_phase, heart_phase);
-    }
-    TypeHeartBreath getType() const override {
-        return HeartBreathPhaseType;
+    HeartBreath(float tp, float bp, float hp) : total_phase(tp), breath_phase(bp), heart_phase(hp) {
+        valid = total_phase <= 0 || breath_phase <= 0 || heart_phase <= 0 ? false : true;
+        updated = true;
     }
 
-    uint32_t getMask() const override {
-        return MASK_HeartBreathPhaseType;
+    TypeHeartBreath getType() const override {
+        return TypeHeartBreath::TypeHeartBreathPhase;
+    }
+
+    void getPhase(float &total, float &breath, float &heart) const {
+        total  = total_phase;
+        breath = breath_phase;
+        heart  = heart_phase;
+
+        // Explicitly allowed because these members are mutable
+        valid = updated = false;
+    }
+
+    // Pure const method, does not modify the object
+    std::tuple<float, float, float> getPhase() const {
+        return std::make_tuple(total_phase, breath_phase, heart_phase);
     }
 };
 
@@ -81,15 +68,16 @@ class BreathRate : public BaseData {
     float breath_rate;
 
   public:
-    BreathRate(float br) : breath_rate(br) {}
-    void print() const override {
-        Serial.printf("Breath Rate: %f\n", breath_rate);
+    BreathRate(float br) : breath_rate(br) {
+        valid   = breath_rate <= 0 ? false : true;
+        updated = true;
     }
     TypeHeartBreath getType() const override {
-        return BreathRateType;
+        return TypeHeartBreath::TypeBreathRate;
     }
-    uint32_t getMask() const override {
-        return MASK_BreathRateType;
+    void getBreathRate(float &breath) const {
+        breath = breath_rate;
+        valid = updated = false;
     }
 };
 
@@ -97,15 +85,16 @@ class HeartRate : public BaseData {
     float heart_rate;
 
   public:
-    HeartRate(float hr) : heart_rate(hr) {}
-    void print() const override {
-        Serial.printf("Heart Rate: %f\n", heart_rate);
+    HeartRate(float hr) : heart_rate(hr) {
+        valid   = heart_rate <= 0 ? false : true;
+        updated = true;
     }
     TypeHeartBreath getType() const override {
-        return HeartRateType;
+        return TypeHeartBreath::TypeHeartRate;
     }
-    uint32_t getMask() const override {
-        return MASK_HeartRateType;
+    void getHeartRate(float &heart) const {
+        heart = heart_rate;
+        valid = updated = false;
     }
 };
 
@@ -114,16 +103,22 @@ class HeartBreathDistance : public BaseData {
     float range;
 
   public:
-    HeartBreathDistance(uint32_t f, float r) : flag(f), range(r) {}
-    void print() const override {
-        Serial.printf("Range: %f\n", range);
+    HeartBreathDistance(uint32_t f, float r) : flag(f), range(r) {
+        if (flag == 0) {
+            valid = false;
+        } else {
+            valid = true;
+        }
+        updated = true;
     }
     TypeHeartBreath getType() const override {
-        return HeartBreathDistanceType;
+        return TypeHeartBreath::TypeHeartBreathDistance;
     }
-
-    uint32_t getMask() const override {
-        return MASK_HeartBreathDistanceType;
+    void getDistance(float &distance) const {
+        if (flag == 0)
+            return;
+        distance = range;
+        valid = updated = flag;
     }
 };
 

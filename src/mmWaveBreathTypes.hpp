@@ -1,5 +1,5 @@
 /**
- * @file mmWaveBreath.h
+ * @file mmWave.h
  * @date  09 May 2024
 
  * @author Spencer Yan
@@ -11,7 +11,6 @@
 
 #ifndef MMWAVEBREATHTYPES_H
 #define MMWAVEBREATHTYPES_H
-#define _VERSION_MMWAVEBREATH_0_0_1 "0.0.9"
 #include <Arduino.h>
 #include <stdint.h>
 
@@ -19,13 +18,12 @@ enum class TypeHeartBreath : uint16_t {
     TypeHeartBreathPhase    = 0x0A13,
     TypeBreathRate          = 0x0A14,
     TypeHeartRate           = 0x0A15,
-    TypeHeartBreathDistance = 0x0A16
+    TypeHeartBreathDistance = 0x0A16,
 };
 
 class BaseData {
   public:
     virtual ~BaseData()                     = default;
-    virtual TypeHeartBreath getType() const = 0;
     bool isValid() const { return valid; }
     bool isUpdated() const { return updated; }
 
@@ -41,11 +39,11 @@ class HeartBreath : public BaseData {
 
   public:
     HeartBreath(float tp, float bp, float hp) : total_phase(tp), breath_phase(bp), heart_phase(hp) {
-        valid = total_phase <= 0 || breath_phase <= 0 || heart_phase <= 0 ? false : true;
+        valid   = total_phase <= 0 || breath_phase <= 0 || heart_phase <= 0 ? false : true;
         updated = true;
     }
 
-    TypeHeartBreath getType() const override {
+    TypeHeartBreath getType() const {
         return TypeHeartBreath::TypeHeartBreathPhase;
     }
 
@@ -72,7 +70,7 @@ class BreathRate : public BaseData {
         valid   = breath_rate <= 0 ? false : true;
         updated = true;
     }
-    TypeHeartBreath getType() const override {
+    TypeHeartBreath getType() const {
         return TypeHeartBreath::TypeBreathRate;
     }
     void getBreathRate(float &breath) const {
@@ -89,7 +87,7 @@ class HeartRate : public BaseData {
         valid   = heart_rate <= 0 ? false : true;
         updated = true;
     }
-    TypeHeartBreath getType() const override {
+    TypeHeartBreath getType() const {
         return TypeHeartBreath::TypeHeartRate;
     }
     void getHeartRate(float &heart) const {
@@ -104,10 +102,10 @@ class HeartBreathDistance : public BaseData {
 
   public:
     HeartBreathDistance(uint32_t f, float r) : flag(f), range(r) {
-        valid = *(bool*)&flag;
+        valid   = *(bool *)&flag;
         updated = true;
     }
-    TypeHeartBreath getType() const override {
+    TypeHeartBreath getType() const {
         return TypeHeartBreath::TypeHeartBreathDistance;
     }
     void getDistance(float &distance) const {

@@ -1,5 +1,5 @@
 /**
- * @file mmWaveBreath.cpp
+ * @file mmWave.cpp
  * @date  09 May 2024
 
  * @author Spencer Yan
@@ -9,18 +9,18 @@
  * @copyright © 2024, Seeed Studio
  */
 
-#include "mmWaveBreath.h"
+#include "mmWave.h"
 #include <utility>
 #include <vector>
 
-mmWaveBreath::mmWaveBreath() {}
+SeeedmmWave::SeeedmmWave() {}
 
-mmWaveBreath::~mmWaveBreath() {
+SeeedmmWave::~SeeedmmWave() {
     _serial->end();
     _serial = nullptr;
 }
 
-void mmWaveBreath::begin(HardwareSerial *serial, uint32_t baud, uint32_t wait_delay, int rst) {
+void SeeedmmWave::begin(HardwareSerial *serial, uint32_t baud, uint32_t wait_delay, int rst) {
     this->_serial     = serial;
     this->_baud       = baud;
     this->_wait_delay = wait_delay;
@@ -37,18 +37,22 @@ void mmWaveBreath::begin(HardwareSerial *serial, uint32_t baud, uint32_t wait_de
     }
 }
 
-int mmWaveBreath::available() {
+int SeeedmmWave::available() {
     return _serial ? _serial->available() : 0;
 }
 
-int mmWaveBreath::read(char *data, int length) {
+int SeeedmmWave::read(char *data, int length) {
     return _serial ? _serial->readBytes(data, length) : 0;
 }
 
-float mmWaveBreath::extractFloat(const uint8_t *bytes) {
+int SeeedmmWave::write(const char *data, int length) {
+    return _serial ? _serial->write(data, length) : 0;
+}
+
+float SeeedmmWave::extractFloat(const uint8_t *bytes) const {
     return *reinterpret_cast<const float *>(bytes);
 }
-uint32_t mmWaveBreath::extractU32(const uint8_t *bytes) {
+uint32_t SeeedmmWave::extractU32(const uint8_t *bytes) const {
     return *reinterpret_cast<const uint32_t *>(bytes);
 }
 
@@ -66,7 +70,7 @@ size_t expectedFrameLength(const std::vector<uint8_t> &buffer) {
     return SIZE_FRAME_HEADER + len + SIZE_DATA_CKSUM;
 }
 
-bool mmWaveBreath::fetch(uint32_t timeout) {
+bool SeeedmmWave::fetch(uint32_t timeout) {
     uint32_t expire_time = millis() + timeout;
     bool startFrame      = false;
     std::vector<uint8_t> frameBuffer;
@@ -104,13 +108,12 @@ bool mmWaveBreath::fetch(uint32_t timeout) {
  * @return true
  * @return false
  */
-bool mmWaveBreath::processFrame(const uint8_t *frame_bytes, size_t len) {
+bool SeeedmmWave::processFrame(const uint8_t *frame_bytes, size_t len) {
     if (len < SIZE_FRAME_HEADER)
         return false;  // Not enough data to process header
 
     uint16_t id        = (frame_bytes[1] << 8) | frame_bytes[2];
     uint16_t data_len  = (frame_bytes[3] << 8) | frame_bytes[4];
-    uint16_t type      = (frame_bytes[5] << 8) | frame_bytes[6];
     uint8_t head_cksum = frame_bytes[7];
     uint8_t data_cksum = frame_bytes[SIZE_FRAME_HEADER + data_len];
 
@@ -120,27 +123,7 @@ bool mmWaveBreath::processFrame(const uint8_t *frame_bytes, size_t len) {
         return false;
     }
 
-    switch (static_cast<TypeHeartBreath>(type)) {
-        case TypeHeartBreath::TypeHeartBreathPhase:
-            _heartBreath = std::make_unique<HeartBreath>(
-                extractFloat(&frame_bytes[SIZE_FRAME_HEADER]),
-                extractFloat(&frame_bytes[SIZE_FRAME_HEADER + sizeof(float)]),
-                extractFloat(&frame_bytes[SIZE_FRAME_HEADER + 2 * sizeof(float)]));
-            break;
-        case TypeHeartBreath::TypeBreathRate:
-            _breathRate = std::make_unique<BreathRate>(extractFloat(&frame_bytes[SIZE_FRAME_HEADER]));
-            break;
-        case TypeHeartBreath::TypeHeartRate:
-            _heartRate = std::make_unique<HeartRate>(extractFloat(&frame_bytes[SIZE_FRAME_HEADER]));
-            break;
-        case TypeHeartBreath::TypeHeartBreathDistance:
-            _heartBreathDistance = std::make_unique<HeartBreathDistance>(
-                extractU32(&frame_bytes[SIZE_FRAME_HEADER]),
-                extractFloat(&frame_bytes[SIZE_FRAME_HEADER + sizeof(uint32_t)]));
-            break;
-        default:
-            return false;  // Unhandled type
-    }
+    uint16_t type = (frame_bytes[5] << 8) | frame_bytes[6];
 
-    return true;
+    return handleType(static_cast<TypeHeartBreath>(type), &frame_bytes[SIZE_FRAME_HEADER], data_len);
 }

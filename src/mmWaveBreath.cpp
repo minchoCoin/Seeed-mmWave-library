@@ -38,25 +38,17 @@ void mmWaveBreath::begin(HardwareSerial *serial, uint32_t baud, uint32_t wait_de
 }
 
 int mmWaveBreath::available() {
-    if (_serial) {
-        return _serial->available();
-    }
-    return 0;
+    return _serial ? _serial->available() : 0;
 }
 
 int mmWaveBreath::read(char *data, int length) {
-    if (_serial) {
-        return _serial->readBytes(data, length);
-    }
-    return 0;
+    return _serial ? _serial->readBytes(data, length) : 0;
 }
 
 float mmWaveBreath::extractFloat(const uint8_t *bytes) {
-    // Assumes system is little endian; you might need to adjust this depending on your architecture
     return *reinterpret_cast<const float *>(bytes);
 }
 uint32_t mmWaveBreath::extractU32(const uint8_t *bytes) {
-    // Assumes system is little endian; you might need to adjust this depending on your architecture
     return *reinterpret_cast<const uint32_t *>(bytes);
 }
 
@@ -70,8 +62,7 @@ bool validateChecksum(const uint8_t *data, size_t len, uint8_t expected_checksum
 }
 
 size_t expectedFrameLength(const std::vector<uint8_t> &buffer) {
-    // Extract the length from the buffer
-    size_t len = (buffer[3] << 8) | buffer[4];  // Adjust index based on your protocol
+    size_t len = (buffer[3] << 8) | buffer[4];
     return SIZE_FRAME_HEADER + len + SIZE_DATA_CKSUM;
 }
 
@@ -90,7 +81,7 @@ bool mmWaveBreath::fetch(uint32_t timeout) {
             if (startFrame) {
                 frameBuffer.push_back(byte);
                 if (frameBuffer.size() >= SIZE_FRAME_HEADER && frameBuffer.size() == expectedFrameLength(frameBuffer)) {
-                    result = processFrame(frameBuffer.data(), frameBuffer.size());
+                    result     = processFrame(frameBuffer.data(), frameBuffer.size());
                     startFrame = false;
                     // print buffer bytes
                     // for (auto b : frameBuffer) {
@@ -129,7 +120,7 @@ bool mmWaveBreath::processFrame(const uint8_t *frame_bytes, size_t len) {
         return false;
     }
 
-    switch (static_cast<TypeHeartBreath>(type)) {  // Assuming frame_bytes[6] contains the type
+    switch (static_cast<TypeHeartBreath>(type)) {
         case TypeHeartBreath::TypeHeartBreathPhase:
             _heartBreath = std::make_unique<HeartBreath>(
                 extractFloat(&frame_bytes[SIZE_FRAME_HEADER]),

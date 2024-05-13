@@ -104,21 +104,15 @@ class HeartBreathDistance : public BaseData {
 
   public:
     HeartBreathDistance(uint32_t f, float r) : flag(f), range(r) {
-        if (flag == 0) {
-            valid = false;
-        } else {
-            valid = true;
-        }
+        valid = *(bool*)&flag;
         updated = true;
     }
     TypeHeartBreath getType() const override {
         return TypeHeartBreath::TypeHeartBreathDistance;
     }
     void getDistance(float &distance) const {
-        if (flag == 0)
-            return;
         distance = range;
-        valid = updated = flag;
+        valid = updated = false;
     }
 };
 

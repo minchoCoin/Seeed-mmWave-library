@@ -56,43 +56,54 @@ uint32_t SeeedmmWave::extractU32(const uint8_t *bytes) const {
     return *reinterpret_cast<const uint32_t *>(bytes);
 }
 
-bool validateChecksum(const uint8_t *data, size_t len, uint8_t expected_checksum) {
+uint8_t SeeedmmWave::calculateChecksum(const uint8_t *data, size_t len) {
     uint8_t checksum = 0;
     for (size_t i = 0; i < len; i++) {
         checksum ^= data[i];
     }
     checksum = ~checksum;
-    return checksum == expected_checksum;
+    return checksum;
+}
+
+bool SeeedmmWave::validateChecksum(const uint8_t *data, size_t len, uint8_t expected_checksum) {
+    return calculateChecksum(data, len) == expected_checksum;
 }
 
 size_t expectedFrameLength(const std::vector<uint8_t> &buffer) {
+    if (buffer.size() < SIZE_FRAME_HEADER) {
+        return SIZE_FRAME_HEADER;  // minimum frame header size
+    }
     size_t len = (buffer[3] << 8) | buffer[4];
     return SIZE_FRAME_HEADER + len + SIZE_DATA_CKSUM;
 }
 
-bool SeeedmmWave::fetch(uint32_t timeout) {
+void printHexBuff(const std::vector<uint8_t> &buffer) {
+    for (auto b : buffer) {
+        Serial.print(b, HEX);
+        Serial.print(" ");
+    }
+    Serial.println();
+}
+
+bool SeeedmmWave::fetch(uint16_t data_type, uint32_t timeout) {
     uint32_t expire_time = millis() + timeout;
+    bool result          = false;
     bool startFrame      = false;
     std::vector<uint8_t> frameBuffer;
-    bool result = false;
     while (millis() < expire_time) {
         if (_serial->available()) {
             uint8_t byte = _serial->read();
-            if (byte == SOF_BYTE) {
+            if (!startFrame && byte == SOF_BYTE) {
                 startFrame = true;
                 frameBuffer.clear();
-            }
-            if (startFrame) {
+                frameBuffer.push_back(byte);
+            } else if (startFrame) {
                 frameBuffer.push_back(byte);
                 if (frameBuffer.size() >= SIZE_FRAME_HEADER && frameBuffer.size() == expectedFrameLength(frameBuffer)) {
-                    result     = processFrame(frameBuffer.data(), frameBuffer.size());
+                    result     = processFrame(frameBuffer.data(), frameBuffer.size(), data_type);
                     startFrame = false;
-                    // print buffer bytes
-                    // for (auto b : frameBuffer) {
-                    //     Serial.print(b, HEX);
-                    //     Serial.print(" ");
-                    // }
-                    // Serial.println();
+                    printHexBuff(frameBuffer);
+                    return true;
                 }
             }
         }
@@ -100,22 +111,19 @@ bool SeeedmmWave::fetch(uint32_t timeout) {
     return result;
 }
 
-/**
- * @brief Process a single frame
- *
- * @param frame_bytes
- * @param len
- * @return true
- * @return false
- */
-bool SeeedmmWave::processFrame(const uint8_t *frame_bytes, size_t len) {
+bool SeeedmmWave::processFrame(const uint8_t *frame_bytes, size_t len, uint16_t data_type = 0xFFFF) {
     if (len < SIZE_FRAME_HEADER)
         return false;  // Not enough data to process header
 
     uint16_t id        = (frame_bytes[1] << 8) | frame_bytes[2];
     uint16_t data_len  = (frame_bytes[3] << 8) | frame_bytes[4];
+    uint16_t type      = (frame_bytes[5] << 8) | frame_bytes[6];
     uint8_t head_cksum = frame_bytes[7];
     uint8_t data_cksum = frame_bytes[SIZE_FRAME_HEADER + data_len];
+
+    // Only proceed if the type matches or if data_type is set to the default, indicating no specific type is required
+    if (data_type != 0xFFFF && data_type != type)
+        return false;
 
     // Checksum validation
     if (!validateChecksum(frame_bytes, SIZE_FRAME_HEADER - SIZE_DATA_CKSUM, head_cksum) ||
@@ -123,7 +131,46 @@ bool SeeedmmWave::processFrame(const uint8_t *frame_bytes, size_t len) {
         return false;
     }
 
-    uint16_t type = (frame_bytes[5] << 8) | frame_bytes[6];
+    return handleType(type, &frame_bytes[SIZE_FRAME_HEADER], data_len);
+}
 
-    return handleType(static_cast<TypeHeartBreath>(type), &frame_bytes[SIZE_FRAME_HEADER], data_len);
+int SeeedmmWave::_sendFrame(const uint8_t *frame_bytes, size_t len) {
+    return _serial ? _serial->write(frame_bytes, len) : 0;
+}
+
+bool SeeedmmWave::SendFrame(const uint16_t type, const uint8_t *data, size_t data_len) {
+    uint8_t frame[SIZE_FRAME_HEADER + data_len + SIZE_DATA_CKSUM];  // Ensure buffer is large enough
+    int packed_len = packFrame(type, data, data_len, frame, sizeof(frame));
+    if (packed_len == SIZE_FRAME_HEADER + data_len + SIZE_DATA_CKSUM) {
+        return _sendFrame(frame, packed_len) == packed_len;
+    }
+    return false;
+}
+
+int SeeedmmWave::packFrame(const uint16_t type, const uint8_t *data, size_t data_len, uint8_t *frame, size_t frame_size) {
+    const size_t header_len = SIZE_FRAME_HEADER;  // SOF, ID, LEN, TYPE, HEAD_CKSUM
+    const size_t total_len  = header_len + data_len + SIZE_DATA_CKSUM;
+    uint16_t ID             = 0x00;
+
+    if (frame_size < total_len) {
+        return -1;  // Buffer too small
+    }
+
+    size_t index       = 0;
+    frame[index++]     = SOF_BYTE;  // SOF
+    frame[index++]     = (ID >> 8) & 0xFF;
+    frame[index++]     = ID & 0xFF;
+    frame[index++]     = (data_len >> 8) & 0xFF;
+    frame[index++]     = data_len & 0xFF;
+    frame[index++]     = (type >> 8) & 0xFF;
+    frame[index++]     = type & 0xFF;
+    uint8_t head_cksum = calculateChecksum(frame, index);
+    frame[index++]     = head_cksum;
+
+    memcpy(frame + index, data, data_len);
+    index += data_len;
+    uint8_t data_cksum = calculateChecksum(frame + header_len, data_len);
+    frame[index++]     = data_cksum;
+
+    return total_len;
 }

@@ -12,7 +12,6 @@ mmWaveBreath mmwave;
 void setup() {
   mmwave.begin(&mmwaveSerial);
   Serial.begin(115200);
-  Serial.println("Welcome, my heart is beatin'");
 }
 
 void loop() {

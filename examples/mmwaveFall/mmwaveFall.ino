@@ -12,7 +12,6 @@ mmWaveFall mmwave;
 void setup() {
   mmwave.begin(&mmwaveSerial);
   Serial.begin(115200);
-  Serial.println("Do not Fall, I will take care of you");
   bool result = false;
   do {
     result = mmwave.setInstallationHeight(3);  // 3m

@@ -17,7 +17,7 @@ This Library is designed to interface with the Seeed Studio XIAO Board on the MR
 
 ## Usage
 
-To start using the library, include it in your Arduino sketch and check out the examples folder.
+To start using the library, include it in your Arduino sketch and refer to the examples folder.
 
 ```cpp
 #include <Arduino.h>
@@ -62,6 +62,20 @@ void loop() {
   }
 }
 ```
+
+### Examples
+
+- **GroveU8X8:** Demonstrates how to utilize Grove GPIO Pins to interface with the Grove - OLED Display 0.96" using the U8X8 library. This example shows basic text display functions.
+
+- **LightRGB:** Provides an example of controlling an RGB LED
+
+- **mmWaveBreath:** Demonstrates the usage of the MR60BHA2 sensor for monitoring breathing and heartbeat. It shows how to initialize the sensor, fetch data, and display breathing rate, heart rate, and phase information.
+
+- **mmWaveFall:** Illustrates how to use the MR60FDC1 sensor for fall detection. This example includes initializing the sensor and processing the fall detection data to trigger alerts.
+
+- **ReadByte:** A basic example to read bytes of data from a sensor or serial input and display the raw data. Useful for debugging and understanding the data format.
+
+- **ReadLuxValue:** Shows how to read lux (light intensity) values from the onboard light sensor. It demonstrates the initialization of the sensor and reading and printing the lux values.
 
 ## API Reference
 

@@ -14,6 +14,23 @@
 #include <Arduino.h>
 #include <stdint.h>
 
+enum class TypeFallDetection : uint16_t {
+    UserLogInfo = 0x0E01,
+
+    ReportFallDetection = 0x0E02,  // is_fall
+    InstallationHeight  = 0x0E04,
+    RadarParameters     = 0x0E06,
+    FallThreshold       = 0x0E08,
+    FallSensitivity     = 0x0E0A,
+
+    HeightUpload        = 0x0E0E,
+    AlarmParameters     = 0x0E0C,
+    RadarInitSetting    = 0x2110,
+    Report3DPointCloudDetection = 0x0A08,
+    Report3DPointCloudTartgetInfo = 0x0A04,
+    ReportUnmannedDetection = 0x0F09,
+};
+
 enum class TypeHeartBreath : uint16_t {
     TypeHeartBreathPhase    = 0x0A13,
     TypeBreathRate          = 0x0A14,
@@ -21,9 +38,9 @@ enum class TypeHeartBreath : uint16_t {
     TypeHeartBreathDistance = 0x0A16,
 };
 
-class BaseData {
+class BreathData {
   public:
-    virtual ~BaseData()                     = default;
+    virtual ~BreathData()                     = default;
     bool isValid() const { return valid; }
     bool isUpdated() const { return updated; }
 
@@ -32,7 +49,7 @@ class BaseData {
     mutable bool updated = false;
 };
 
-class HeartBreath : public BaseData {
+class HeartBreath : public BreathData {
     float total_phase;
     float breath_phase;
     float heart_phase;
@@ -62,7 +79,7 @@ class HeartBreath : public BaseData {
     }
 };
 
-class BreathRate : public BaseData {
+class BreathRate : public BreathData {
     float breath_rate;
 
   public:
@@ -79,7 +96,7 @@ class BreathRate : public BaseData {
     }
 };
 
-class HeartRate : public BaseData {
+class HeartRate : public BreathData {
     float heart_rate;
 
   public:
@@ -96,7 +113,7 @@ class HeartRate : public BaseData {
     }
 };
 
-class HeartBreathDistance : public BaseData {
+class HeartBreathDistance : public BreathData {
     uint32_t flag;
     float range;
 

@@ -69,6 +69,20 @@ bool SeeedmmWave::validateChecksum(const uint8_t *data, size_t len, uint8_t expe
     return calculateChecksum(data, len) == expected_checksum;
 }
 
+void SeeedmmWave::floatToBytes(float value, uint8_t *bytes) {
+    uint8_t *p = reinterpret_cast<uint8_t *>(&value);
+    for (size_t i = 0; i < sizeof(float); ++i) {
+        bytes[i] = p[i];
+    }
+}
+
+void SeeedmmWave::uint32ToBytes(uint32_t value, uint8_t *bytes) {
+    uint8_t *p = reinterpret_cast<uint8_t *>(&value);
+    for (size_t i = 0; i < sizeof(uint32_t); ++i) {
+        bytes[i] = p[i];
+    }
+}
+
 size_t expectedFrameLength(const std::vector<uint8_t> &buffer) {
     if (buffer.size() < SIZE_FRAME_HEADER) {
         return SIZE_FRAME_HEADER;  // minimum frame header size
@@ -87,7 +101,7 @@ void printHexBuff(const std::vector<uint8_t> &buffer) {
 
 bool SeeedmmWave::fetch(uint16_t data_type, uint32_t timeout) {
     uint32_t expire_time = millis() + timeout;
-    bool result          = false;
+    // bool result          = false;
     bool startFrame      = false;
     std::vector<uint8_t> frameBuffer;
     while (millis() < expire_time) {
@@ -100,15 +114,19 @@ bool SeeedmmWave::fetch(uint16_t data_type, uint32_t timeout) {
             } else if (startFrame) {
                 frameBuffer.push_back(byte);
                 if (frameBuffer.size() >= SIZE_FRAME_HEADER && frameBuffer.size() == expectedFrameLength(frameBuffer)) {
-                    result     = processFrame(frameBuffer.data(), frameBuffer.size(), data_type);
+                    if (processFrame(frameBuffer.data(), frameBuffer.size(), data_type)) {
+                        // Serial.print("Recieved>>>");
+                        // printHexBuff(frameBuffer);
+                        return true;
+                    }
                     startFrame = false;
-                    printHexBuff(frameBuffer);
-                    return true;
+                    frameBuffer.clear();
                 }
             }
         }
     }
-    return result;
+    // return result;
+    return false;
 }
 
 bool SeeedmmWave::processFrame(const uint8_t *frame_bytes, size_t len, uint16_t data_type = 0xFFFF) {
@@ -134,43 +152,27 @@ bool SeeedmmWave::processFrame(const uint8_t *frame_bytes, size_t len, uint16_t 
     return handleType(type, &frame_bytes[SIZE_FRAME_HEADER], data_len);
 }
 
-int SeeedmmWave::_sendFrame(const uint8_t *frame_bytes, size_t len) {
-    return _serial ? _serial->write(frame_bytes, len) : 0;
-}
-
-bool SeeedmmWave::SendFrame(const uint16_t type, const uint8_t *data, size_t data_len) {
-    uint8_t frame[SIZE_FRAME_HEADER + data_len + SIZE_DATA_CKSUM];  // Ensure buffer is large enough
-    int packed_len = packFrame(type, data, data_len, frame, sizeof(frame));
-    if (packed_len == SIZE_FRAME_HEADER + data_len + SIZE_DATA_CKSUM) {
-        return _sendFrame(frame, packed_len) == packed_len;
+bool SeeedmmWave::SendFrame(uint16_t type, const uint8_t *data = nullptr, size_t len = 0) {
+    std::vector<uint8_t> frame;  // SOF, ID, LEN, TYPE, HEAD_CKSUM,
+                                 // DATA, DATA_CKSUM
+    frame.push_back(SOF_BYTE);   // Start of Frame
+    frame.push_back(0x00);       // ID
+    frame.push_back(0x00);       // ID
+    frame.push_back(len >> 8);
+    frame.push_back(len & 0xFF);
+    frame.push_back(type >> 8);
+    frame.push_back(type & 0xFF);
+    uint8_t head_cksum = calculateChecksum(frame.data(), frame.size());
+    frame.push_back(head_cksum);
+    if (data != nullptr) {
+        for (size_t i = 0; i < len; i++) {
+            frame.push_back(data[i]);
+        }
+        uint8_t data_cksum = calculateChecksum(data, len);
+        frame.push_back(data_cksum);
     }
-    return false;
-}
-
-int SeeedmmWave::packFrame(const uint16_t type, const uint8_t *data, size_t data_len, uint8_t *frame, size_t frame_size) {
-    const size_t header_len = SIZE_FRAME_HEADER;  // SOF, ID, LEN, TYPE, HEAD_CKSUM
-    const size_t total_len  = header_len + data_len + SIZE_DATA_CKSUM;
-    uint16_t ID             = 0x00;
-
-    if (frame_size < total_len) {
-        return -1;  // Buffer too small
-    }
-
-    size_t index       = 0;
-    frame[index++]     = SOF_BYTE;  // SOF
-    frame[index++]     = (ID >> 8) & 0xFF;
-    frame[index++]     = ID & 0xFF;
-    frame[index++]     = (data_len >> 8) & 0xFF;
-    frame[index++]     = data_len & 0xFF;
-    frame[index++]     = (type >> 8) & 0xFF;
-    frame[index++]     = type & 0xFF;
-    uint8_t head_cksum = calculateChecksum(frame, index);
-    frame[index++]     = head_cksum;
-
-    memcpy(frame + index, data, data_len);
-    index += data_len;
-    uint8_t data_cksum = calculateChecksum(frame + header_len, data_len);
-    frame[index++]     = data_cksum;
-
-    return total_len;
+    _serial->write(frame.data(), frame.size());
+    Serial.print("Send<<<");
+    printHexBuff(frame);
+    return true;
 }

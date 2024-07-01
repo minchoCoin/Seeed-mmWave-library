@@ -9,8 +9,8 @@
  * @copyright © 2024, Seeed Studio
  */
 
-#ifndef MMWAVEBREATHTYPES_H
-#define MMWAVEBREATHTYPES_H
+#ifndef XIAO_MMWAVEBREATHTYPES_H
+#define XIAO_MMWAVEBREATHTYPES_H
 #include <Arduino.h>
 #include <stdint.h>
 
@@ -131,4 +131,4 @@ class HeartBreathDistance : public BreathData {
     }
 };
 
-#endif /*MMWAVEBREATHTYPES_H*/
+#endif /*XIAO_MMWAVEBREATHTYPES_H*/

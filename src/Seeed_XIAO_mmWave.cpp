@@ -9,7 +9,7 @@
  * @copyright © 2024, Seeed Studio
  */
 
-#include "mmWave.h"
+#include "Seeed_XIAO_mmWave.h"
 #include <utility>
 #include <vector>
 

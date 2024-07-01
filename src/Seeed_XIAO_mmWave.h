@@ -9,8 +9,8 @@
  * @copyright © 2024, Seeed Studio
  */
 
-#ifndef MMWAVE_H
-#define MMWAVE_H
+#ifndef SEEED_XIAO_MMWAVE_H
+#define SEEED_XIAO_MMWAVE_H
 
 #define _VERSION_MMWAVEBREATH_0_0_1 "0.0.9"
 
@@ -72,74 +72,7 @@ class SeeedmmWave {
     void uint32ToBytes(uint32_t value, uint8_t *bytes);
 };
 
-// class mmWaveBreath : public SeeedmmWave {
-//   private:
-//     std::unique_ptr<HeartBreath> _heartBreath;
-//     std::unique_ptr<BreathRate> _breathRate;
-//     std::unique_ptr<HeartRate> _heartRate;
-//     std::unique_ptr<HeartBreathDistance> _heartBreathDistance;
 
-//   public:
-//     mmWaveBreath() {}
-//     virtual ~mmWaveBreath() {}
-//     bool handleType(uint16_t _type, const uint8_t *data, size_t data_len) override {
-//         TypeHeartBreath type = static_cast<TypeHeartBreath>(_type);
-//         switch (type) {
-//             case TypeHeartBreath::TypeHeartBreathPhase:
-//                 _heartBreath = std::make_unique<HeartBreath>(
-//                     extractFloat(data),
-//                     extractFloat(data + sizeof(float)),
-//                     extractFloat(data + 2 * sizeof(float)));
-//                 break;
-//             case TypeHeartBreath::TypeBreathRate:
-//                 _breathRate = std::make_unique<BreathRate>(extractFloat(data));
-//                 break;
-//             case TypeHeartBreath::TypeHeartRate:
-//                 _heartRate = std::make_unique<HeartRate>(extractFloat(data));
-//                 break;
-//             case TypeHeartBreath::TypeHeartBreathDistance:
-//                 _heartBreathDistance = std::make_unique<HeartBreathDistance>(
-//                     extractU32(data),
-//                     extractFloat(data + sizeof(uint32_t)));
-//                 break;
-//             default:
-//                 return false;  // Unhandled type
-//         }
-//         return true;
-//     }
-
-//     bool getHeartBreathPhases(float &total_phase, float &breath_phase, float &heart_phase) const {
-//         if (_heartBreath && _heartBreath->isValid()) {
-//             _heartBreath->getPhase(total_phase, breath_phase, heart_phase);
-//             return true;
-//         }
-//         return false;
-//     }
-
-//     bool getBreathRate(float &rate) const {
-//         if (_breathRate && _breathRate->isValid()) {
-//             _breathRate->getBreathRate(rate);
-//             return true;
-//         }
-//         return false;
-//     }
-
-//     bool getHeartRate(float &rate) const {
-//         if (_heartRate && _heartRate->isValid()) {
-//             _heartRate->getHeartRate(rate);
-//             return true;
-//         }
-//         return false;
-//     }
-
-//     bool getHeartBreathDistance(float &distance) const {
-//         if (_heartBreathDistance && _heartBreathDistance->isValid()) {
-//             _heartBreathDistance->getDistance(distance);
-//             return true;
-//         }
-//         return false;
-//     }
-// };
 class mmWaveBreath : public SeeedmmWave {
   private:
     HeartBreath* _heartBreath;              // Raw pointer for HeartBreath
@@ -437,4 +370,4 @@ class mmWaveFall : public SeeedmmWave {
     //     }
     // }
 };
-#endif /*MMWAVE_H*/
+#endif /*SEEED_XIAO_MMWAVE_H*/

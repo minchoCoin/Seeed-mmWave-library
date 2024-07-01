@@ -1,7 +1,7 @@
 {
 	"name": "Seeed mmWave x",
-	"keywords": "",
+	"keywords": "arduino, seeedstudio, mmwave ",
 	"version": "0.0.9",
-	"description": "",
-	"author": "Spencer"
+	"description": "Seeed mmWave helps your work with mmWave",
+	"author": "Seeed Studio"
 }

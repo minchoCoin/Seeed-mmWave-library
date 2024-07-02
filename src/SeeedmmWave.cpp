@@ -1,23 +1,19 @@
-/**
- * @file mmWave.cpp
- * @date  09 May 2024
+#include "SeeedmmWave.h"
 
- * @author Spencer Yan
- *
- * @note Description of the file
- *
- * @copyright © 2024, Seeed Studio
- */
+size_t expectedFrameLength(const std::vector<uint8_t>& buffer) {
+  if (buffer.size() < SIZE_FRAME_HEADER) {
+    return SIZE_FRAME_HEADER;  // minimum frame header size
+  }
+  size_t len = (buffer[3] << 8) | buffer[4];
+  return SIZE_FRAME_HEADER + len + SIZE_DATA_CKSUM;
+}
 
-#include "Seeed_XIAO_mmWave.h"
-#include <utility>
-#include <vector>
-
-SeeedmmWave::SeeedmmWave() {}
-
-SeeedmmWave::~SeeedmmWave() {
-  _serial->end();
-  _serial = nullptr;
+void printHexBuff(const std::vector<uint8_t>& buffer) {
+  for (auto b : buffer) {
+    Serial.print(b, HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
 }
 
 void SeeedmmWave::begin(HardwareSerial* serial, uint32_t baud,
@@ -85,53 +81,6 @@ void SeeedmmWave::uint32ToBytes(uint32_t value, uint8_t* bytes) {
   }
 }
 
-size_t expectedFrameLength(const std::vector<uint8_t>& buffer) {
-  if (buffer.size() < SIZE_FRAME_HEADER) {
-    return SIZE_FRAME_HEADER;  // minimum frame header size
-  }
-  size_t len = (buffer[3] << 8) | buffer[4];
-  return SIZE_FRAME_HEADER + len + SIZE_DATA_CKSUM;
-}
-
-void printHexBuff(const std::vector<uint8_t>& buffer) {
-  for (auto b : buffer) {
-    Serial.print(b, HEX);
-    Serial.print(" ");
-  }
-  Serial.println();
-}
-
-bool SeeedmmWave::fetch(uint16_t data_type, uint32_t timeout) {
-  uint32_t expire_time = millis() + timeout;
-  // bool result          = false;
-  bool startFrame = false;
-  std::vector<uint8_t> frameBuffer;
-  while (millis() < expire_time) {
-    if (_serial->available()) {
-      uint8_t byte = _serial->read();
-      if (!startFrame && byte == SOF_BYTE) {
-        startFrame = true;
-        frameBuffer.clear();
-        frameBuffer.push_back(byte);
-      } else if (startFrame) {
-        frameBuffer.push_back(byte);
-        if (frameBuffer.size() >= SIZE_FRAME_HEADER &&
-            frameBuffer.size() == expectedFrameLength(frameBuffer)) {
-          if (processFrame(frameBuffer.data(), frameBuffer.size(), data_type)) {
-            // Serial.print("Recieved>>>");
-            // printHexBuff(frameBuffer);
-            return true;
-          }
-          startFrame = false;
-          frameBuffer.clear();
-        }
-      }
-    }
-  }
-  // return result;
-  return false;
-}
-
 bool SeeedmmWave::processFrame(const uint8_t* frame_bytes, size_t len,
                                uint16_t data_type = 0xFFFF) {
   if (len < SIZE_FRAME_HEADER)
@@ -159,7 +108,7 @@ bool SeeedmmWave::processFrame(const uint8_t* frame_bytes, size_t len,
   return handleType(type, &frame_bytes[SIZE_FRAME_HEADER], data_len);
 }
 
-bool SeeedmmWave::SendFrame(uint16_t type, const uint8_t* data = nullptr,
+bool SeeedmmWave::sendFrame(uint16_t type, const uint8_t* data = nullptr,
                             size_t len = 0) {
   std::vector<uint8_t> frame;  // SOF, ID, LEN, TYPE, HEAD_CKSUM,
                                // DATA, DATA_CKSUM
@@ -183,4 +132,35 @@ bool SeeedmmWave::SendFrame(uint16_t type, const uint8_t* data = nullptr,
   Serial.print("Send<<<");
   printHexBuff(frame);
   return true;
+}
+
+bool SeeedmmWave::fetch(uint16_t data_type, uint32_t timeout) {
+  uint32_t expire_time = millis() + timeout;
+  bool startFrame      = false;
+  std::vector<uint8_t> frameBuffer;
+  while (millis() < expire_time) {
+    if (_serial->available()) {
+      uint8_t byte = _serial->read();
+      if (!startFrame && byte == SOF_BYTE) {
+        startFrame = true;
+        frameBuffer.clear();
+        frameBuffer.push_back(byte);
+      } else if (startFrame) {
+        frameBuffer.push_back(byte);
+        if (frameBuffer.size() >= SIZE_FRAME_HEADER &&
+            frameBuffer.size() == expectedFrameLength(frameBuffer)) {
+          if (processFrame(frameBuffer.data(), frameBuffer.size(), data_type)) {
+#if _MMWAVE_DEBUG == 1
+            Serial.print("Recieved>>>");
+            printHexBuff(frameBuffer);
+#endif
+            return true;
+          }
+          startFrame = false;
+          frameBuffer.clear();
+        }
+      }
+    }
+  }
+  return false;
 }

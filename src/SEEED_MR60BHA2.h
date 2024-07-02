@@ -1,35 +1,19 @@
 /**
- * @file mmWave.h
- * @date  09 May 2024
-
+ * @file SEEED_MR60BHA2.h
+ * @date  02 July 2024
  * @author Spencer Yan
  *
  * @note Description of the file
  *
  * @copyright © 2024, Seeed Studio
+ *
+ * @attention MR60BHA2 module is used to monitor breath and heart rate
  */
 
-#ifndef XIAO_MMWAVEBREATHTYPES_H
-#define XIAO_MMWAVEBREATHTYPES_H
-#include <Arduino.h>
-#include <stdint.h>
+#ifndef SEEED_MR60BHA2_H
+#define SEEED_MR60BHA2_H
 
-enum class TypeFallDetection : uint16_t {
-  UserLogInfo = 0x0E01,
-
-  ReportFallDetection = 0x0E02,  // is_fall
-  InstallationHeight  = 0x0E04,
-  RadarParameters     = 0x0E06,
-  FallThreshold       = 0x0E08,
-  FallSensitivity     = 0x0E0A,
-
-  HeightUpload                  = 0x0E0E,
-  AlarmParameters               = 0x0E0C,
-  RadarInitSetting              = 0x2110,
-  Report3DPointCloudDetection   = 0x0A08,
-  Report3DPointCloudTartgetInfo = 0x0A04,
-  ReportUnmannedDetection       = 0x0F09,
-};
+#include "SeeedmmWave.h"
 
 enum class TypeHeartBreath : uint16_t {
   TypeHeartBreathPhase    = 0x0A13,
@@ -137,4 +121,67 @@ class HeartBreathDistance : public BreathData {
   }
 };
 
-#endif /*XIAO_MMWAVEBREATHTYPES_H*/
+class SEEED_MR60BHA2 : public SeeedmmWave {
+ private:
+  HeartBreath* _heartBreath;
+  BreathRate* _breathRate;
+  HeartRate* _heartRate;
+  HeartBreathDistance* _heartBreathDistance;
+
+ public:
+  SEEED_MR60BHA2()
+      : _heartBreath(nullptr),
+        _breathRate(nullptr),
+        _heartRate(nullptr),
+        _heartBreathDistance(nullptr) {}
+
+  virtual ~SEEED_MR60BHA2() {
+    delete _heartBreath;
+    delete _breathRate;
+    delete _heartRate;
+    delete _heartBreathDistance;
+  }
+
+  bool handleType(uint16_t _type, const uint8_t* data,
+                  size_t data_len) override {
+    // First, delete any existing objects to avoid memory leaks
+    delete _heartBreath;
+    _heartBreath = nullptr;
+    delete _breathRate;
+    _breathRate = nullptr;
+    delete _heartRate;
+    _heartRate = nullptr;
+    delete _heartBreathDistance;
+    _heartBreathDistance = nullptr;
+
+    TypeHeartBreath type = static_cast<TypeHeartBreath>(_type);
+    switch (type) {
+      case TypeHeartBreath::TypeHeartBreathPhase:
+        _heartBreath = new HeartBreath(extractFloat(data),
+                                       extractFloat(data + sizeof(float)),
+                                       extractFloat(data + 2 * sizeof(float)));
+        break;
+      case TypeHeartBreath::TypeBreathRate:
+        _breathRate = new BreathRate(extractFloat(data));
+        break;
+      case TypeHeartBreath::TypeHeartRate:
+        _heartRate = new HeartRate(extractFloat(data));
+        break;
+      case TypeHeartBreath::TypeHeartBreathDistance:
+        _heartBreathDistance = new HeartBreathDistance(
+            extractU32(data), extractFloat(data + sizeof(uint32_t)));
+        break;
+      default:
+        return false;  // Unhandled type
+    }
+    return true;
+  }
+
+  bool getHeartBreathPhases(float& total_phase, float& breath_phase,
+                            float& heart_phase) const;
+  bool getBreathRate(float& rate) const;
+  bool getHeartRate(float& rate) const;
+  bool getHeartBreathDistance(float& distance) const;
+};
+
+#endif /*SEEED_MR60BHA2_H*/

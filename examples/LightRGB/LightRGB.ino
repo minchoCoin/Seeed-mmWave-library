@@ -1,16 +1,6 @@
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 
-// If the board is an ESP32, include the HardwareSerial library and create a
-// HardwareSerial object for the mmWave serial communication
-#ifdef ESP32
-#  include <HardwareSerial.h>
-HardwareSerial mmwaveSerial(0);
-#else
-// Otherwise, define mmwaveSerial as Serial1
-#  define mmwaveSerial Serial1
-#endif
-
 // Define the pin for the NeoPixel
 const int pixelPin = D1;
 
@@ -21,7 +11,6 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, pixelPin, NEO_GRB + NEO_KHZ800);
 void setup() {
   // Initialize the serial communication at 115200 baud
   Serial.begin(115200);
-  mmwaveSerial.begin(115200);
 
   // Initialize the NeoPixel
   pixels.begin();

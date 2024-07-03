@@ -33,31 +33,27 @@ enum class TypeFallDetection : uint16_t {
 
 class SEEED_MR60FDC1 : public SeeedmmWave {
  private:
-  // get fall detection
-  bool _isFall        = false;
-  bool _isFallUpdated = false;
+  /* get fall detection*/
+  bool _isFall = false;
 
-  // set height
+  /*set height*/
   bool _HightValid = false;
 
-  //  get parameters
+  /*  get parameters */
   bool _parametersValid = false;
   float _height;
-  float _thershold;
+  float _thershold;  // deault value=0.6m
   uint32_t _sensitivity;
   float _rect_XL;
   float _rect_XR;
   float _rect_ZF;
   float _rect_ZB;
 
-  float set_threshold;  // deault value=0.6m TODO 这个是干什么用的？
-  bool is_threshold_valid = false;
-
-  bool _isAlarmAreaValid;
-
-  bool _isSensitivityValid;
-  // bool isSensitivityValid() const { return sensitivity > 0; }
-  bool _isHuman;
+  bool isThresholdValid;     // 0 : Failed to obtain  1 : acquisition successful
+  bool _isAlarmAreaValid;    // 0 : Failed to obtain  1 : acquisition
+                             // successful
+  bool _isSensitivityValid;  // 0 : Failed to obtain  1 : acquisition successful
+  bool _isHuman;             // 0 : no one            1 : There is someone
 
  public:
   SEEED_MR60FDC1() {}
@@ -65,68 +61,25 @@ class SEEED_MR60FDC1 : public SeeedmmWave {
   virtual ~SEEED_MR60FDC1() {}
 
   bool handleType(uint16_t _type, const uint8_t* data,
-                  size_t data_len) override {
-    TypeFallDetection type = static_cast<TypeFallDetection>(_type);
-    switch (type) {
-      case TypeFallDetection::ReportFallDetection:
-        _isFallUpdated = true;
-        _isFall        = *(const bool*)data;
-        break;
-      case TypeFallDetection::InstallationHeight: {
-        if (data_len != 1)
-          return false;
-        _HightValid = *(const uint8_t*)data;
-        break;
-      }
-      case TypeFallDetection::RadarParameters: {
-        if (data_len <= 1)
-          return false;
-        _height          = extractFloat(data);
-        _thershold       = extractFloat(data + sizeof(float));
-        _sensitivity     = extractU32(data + 2 * sizeof(float));
-        _rect_XL         = extractFloat(data + 3 * sizeof(float));
-        _rect_XR         = extractFloat(data + 4 * sizeof(float));
-        _rect_ZF         = extractFloat(data + 5 * sizeof(float));
-        _rect_ZB         = extractFloat(data + 6 * sizeof(float));
-        _parametersValid = true;
-        break;
-      }
-      case TypeFallDetection::FallThreshold: {  // set fall threshold result
-        if (data_len != 1)
-          return false;
-        is_threshold_valid = *(const uint8_t*)data;
-        break;
-      }
-      case TypeFallDetection::AlarmParameters: {
-        _isAlarmAreaValid = *(const uint8_t*)data;
-        break;
-      }
-      case TypeFallDetection::FallSensitivity:
-        _isSensitivityValid = *(const uint8_t*)data;
-        break;
-      case TypeFallDetection::ReportUnmannedDetection:
-        _isHuman = *(const uint8_t*)data;
-        break;
-      default:
-        return false;
-    }
-    return true;
-  }
+                  size_t data_len) override;
 
+  bool resetDevice();
+
+  bool setSensitivity(uint32_t _sensitivity);
+  bool setFallThreshold(float threshold);
   bool setInstallationHeight(float height);
-  bool getFall(bool& fall_status);
+  bool setAlamAreaParameters(float rect_XL, float rect_XR, float rect_ZF,
+                             float rect_ZB);
+
+  bool getRadarParameters();
   bool getRadarParameters(float& height, float& threshold,
                           uint32_t& sensitivity);
   bool getRadarParameters(float& height, float& threshold,
                           uint32_t& sensitivity, float& rect_XL, float& rect_XR,
                           float& rect_ZF, float& rect_ZB);
-  bool getRadarParameters();
-  bool setSensitivity(uint32_t _sensitivity);
-  bool setFallThreshold(float threshold);
-  bool setAlamAreaParameters(float rect_XL, float rect_XR, float rect_ZF,
-                             float rect_ZB);
-  bool resetDevice();
   bool get3DPointCloud(int option);
+
+  bool getFall(bool& fall_status);
   bool getHuman(bool& human_status);
 };
 

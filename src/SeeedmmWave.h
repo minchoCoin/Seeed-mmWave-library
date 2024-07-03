@@ -36,11 +36,24 @@ class SeeedmmWave {
   uint32_t _wait_delay;
 
  protected:
+  uint16_t _id = 0;
   uint8_t calculateChecksum(const uint8_t* data, size_t len);
   bool validateChecksum(const uint8_t* data, size_t len,
                         uint8_t expected_checksum);
   bool processFrame(const uint8_t* frame_bytes, size_t len, uint16_t data_type);
 
+  /**
+   * @brief Handle different types of data frames.
+   *
+   * This is a pure virtual function that must be overridden by derived classes
+   * to handle specific types of data frames. The function processes the data
+   * based on the type and data length, and performs necessary actions.
+   *
+   * @param _type The type of the data frame.
+   * @param data The pointer to the data buffer.
+   * @param data_len The length of the data buffer.
+   * @return true if the data is processed successfully, false otherwise.
+   */
   virtual bool handleType(uint16_t _type, const uint8_t* data,
                           size_t data_len) = 0;
 

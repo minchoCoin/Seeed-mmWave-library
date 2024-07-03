@@ -55,6 +55,9 @@ class SEEED_MR60FDC1 : public SeeedmmWave {
   bool _isSensitivityValid;  // 0 : Failed to obtain  1 : acquisition successful
   bool _isHuman;             // 0 : no one            1 : There is someone
 
+ protected:
+  bool getRadarParameters();
+
  public:
   SEEED_MR60FDC1() {}
 
@@ -63,21 +66,21 @@ class SEEED_MR60FDC1 : public SeeedmmWave {
   bool handleType(uint16_t _type, const uint8_t* data,
                   size_t data_len) override;
 
-  bool resetDevice();
+  bool resetSetting(void);
 
-  bool setSensitivity(uint32_t _sensitivity);
-  bool setFallThreshold(float threshold);
-  bool setInstallationHeight(float height);
-  bool setAlamAreaParameters(float rect_XL, float rect_XR, float rect_ZF,
-                             float rect_ZB);
+  bool setInstallationHeight(const float height);
+  bool setThreshold(const float threshold);
+  bool setSensitivity(const uint32_t _sensitivity);
+  bool setAlamArea(const float rect_XL, const float rect_XR,
+                   const float rect_ZF, const float rect_ZB);
 
-  bool getRadarParameters();
   bool getRadarParameters(float& height, float& threshold,
                           uint32_t& sensitivity);
   bool getRadarParameters(float& height, float& threshold,
                           uint32_t& sensitivity, float& rect_XL, float& rect_XR,
                           float& rect_ZF, float& rect_ZB);
-  bool get3DPointCloud(int option);
+
+  // bool get3DPointCloud(const int option);
 
   bool getFall(bool& fall_status);
   bool getHuman(bool& human_status);

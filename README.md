@@ -1,4 +1,4 @@
-# Seeed XIAO Arduino mmWave Library
+# Seeed Arduino mmWave Library For XIAO
 
 ## Introduction
 
@@ -21,7 +21,7 @@ To start using the library, include it in your Arduino sketch and refer to the e
 
 ```cpp
 #include <Arduino.h>
-#include "Seeed_XIAO_mmWave.h"
+#include "Seeed_Arduino_mmWave.h"
 
 #ifdef ESP32
 #  include <HardwareSerial.h>

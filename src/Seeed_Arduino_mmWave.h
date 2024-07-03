@@ -1,5 +1,5 @@
 /**
- * @file Seeed_XIAO_mmWave.h
+ * @file Seeed_Arduino_mmWave.h
  * @date  02 July 2024
 
  * @author Spencer Yan
@@ -9,8 +9,8 @@
  * @copyright © 2024, Seeed Studio
  */
 
-#ifndef SEEED_XIAO_MMWAVE_H
-#define SEEED_XIAO_MMWAVE_H
+#ifndef Seeed_Arduino_mmWave_H
+#define Seeed_Arduino_mmWave_H
 
 #define _VERSION_MMWAVEBREATH_0_0_1 "1.0.0"
 
@@ -27,4 +27,4 @@ typedef enum {
 #endif
 } MMWAVE_DEVICE;
 
-#endif /*SEEED_XIAO_MMWAVE_H*/
+#endif /*Seeed_Arduino_mmWave_H*/

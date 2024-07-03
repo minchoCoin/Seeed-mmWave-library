@@ -8,7 +8,7 @@ HardwareSerial mmwaveSerial(0);
 #  define mmwaveSerial Serial1
 #endif
 
-mmWaveBreath mmwave;
+SEEED_MR60BHA2 mmwave;
 void setup() {
   mmwave.begin(&mmwaveSerial);
   Serial.begin(115200);

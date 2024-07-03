@@ -8,7 +8,8 @@ HardwareSerial mmwaveSerial(0);
 #  define mmwaveSerial Serial1
 #endif
 
-mmWaveFall mmwave;
+SEEED_MR60FDC1 mmwave;
+
 void setup() {
   mmwave.begin(&mmwaveSerial);
   Serial.begin(115200);
@@ -17,7 +18,7 @@ void setup() {
     result = mmwave.setInstallationHeight(3);  // 3m
     result ? Serial.println("setInstallationHeight success")
            : Serial.println("setInstallationHeight failed");
-    delay(3000);
+    delay(1000);
   } while (result != true);
 }
 

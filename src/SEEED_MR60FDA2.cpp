@@ -1,5 +1,5 @@
 /**
- * @file SEEED_MR60FDC1.cpp
+ * @file SEEED_MR60FDA2.cpp
  * @date  02 July 2024
 
  * @author Spencer Yan
@@ -9,7 +9,7 @@
  * @copyright © 2024, Seeed Studio
  */
 
-#include "SEEED_MR60FDC1.h"
+#include "SEEED_MR60FDA2.h"
 
 /**
  * @brief Radar initialization.
@@ -25,7 +25,7 @@
  * - Rect_ZF: 0.5
  * - Rect_ZB: 0.5
  */
-bool SEEED_MR60FDC1::resetSetting(void) {
+bool SEEED_MR60FDA2::resetSetting(void) {
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::RadarInitSetting);
   if (this->sendFrame(type, nullptr, 0)) {
     return fetch(type, 3000);  // Timeout of 3000ms to fetch the response
@@ -41,7 +41,7 @@ bool SEEED_MR60FDC1::resetSetting(void) {
  * @retval false Failed to set altitude
  *
  */
-bool SEEED_MR60FDC1::setInstallationHeight(const float height) {
+bool SEEED_MR60FDA2::setInstallationHeight(const float height) {
   uint8_t data[sizeof(float)];
   floatToBytes(height, data);
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::InstallationHeight);
@@ -58,7 +58,7 @@ bool SEEED_MR60FDC1::setInstallationHeight(const float height) {
  *
  * @note The default fall threshold of the radar is 0.6 m.
  */
-bool SEEED_MR60FDC1::setThreshold(const float threshold) {
+bool SEEED_MR60FDA2::setThreshold(const float threshold) {
   uint8_t data[sizeof(float)];
   floatToBytes(threshold, data);
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::FallThreshold);
@@ -78,7 +78,7 @@ bool SEEED_MR60FDC1::setThreshold(const float threshold) {
  * @note the initial value is 3, which represents an average of 3 frames of
  * data.
  */
-bool SEEED_MR60FDC1::setSensitivity(const uint32_t _sensitivity) {
+bool SEEED_MR60FDA2::setSensitivity(const uint32_t _sensitivity) {
   uint8_t data[sizeof(uint32_t)];
   uint32ToBytes(_sensitivity, data);
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::FallSensitivity);
@@ -98,7 +98,7 @@ bool SEEED_MR60FDC1::setSensitivity(const uint32_t _sensitivity) {
  * @retval true Set successfully
  * @retval false Failed to set
  */
-bool SEEED_MR60FDC1::setAlamArea(const float rect_XL, const float rect_XR,
+bool SEEED_MR60FDA2::setAlamArea(const float rect_XL, const float rect_XR,
                                  const float rect_ZF, const float rect_ZB) {
   uint8_t data[sizeof(float) * 4];
   floatToBytes(rect_XL, data);
@@ -121,7 +121,7 @@ bool SEEED_MR60FDC1::setAlamArea(const float rect_XL, const float rect_XR,
  * @retval true acquisition is successful
  * @retval false failed to obtain
  */
-bool SEEED_MR60FDC1::getRadarParameters(float& height, float& threshold,
+bool SEEED_MR60FDA2::getRadarParameters(float& height, float& threshold,
                                         uint32_t& sensitivity) {
   getRadarParameters();
   if (_parametersValid) {
@@ -147,7 +147,7 @@ bool SEEED_MR60FDC1::getRadarParameters(float& height, float& threshold,
  * @retval true acquisition is successful
  * @retval false failed to obtain
  */
-bool SEEED_MR60FDC1::getRadarParameters(float& height, float& threshold,
+bool SEEED_MR60FDA2::getRadarParameters(float& height, float& threshold,
                                         uint32_t& sensitivity, float& rect_XL,
                                         float& rect_XR, float& rect_ZF,
                                         float& rect_ZB) {
@@ -172,7 +172,7 @@ bool SEEED_MR60FDC1::getRadarParameters(float& height, float& threshold,
  * @retval true acquisition is successful
  * @retval false failed to obtain
  */
-bool SEEED_MR60FDC1::getRadarParameters() {
+bool SEEED_MR60FDA2::getRadarParameters() {
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::RadarParameters);
   if (this->sendFrame(type, nullptr, 0)) {
     return fetch(type, 3000);  // Timeout of 2000 ms to fetch the response
@@ -192,8 +192,7 @@ bool SEEED_MR60FDC1::getRadarParameters() {
  * updated.
  * @retval false The function failed to execute.
  */
-bool SEEED_MR60FDC1::getFall(bool& fall_status) {
-  fall_status = _isFall;
+bool SEEED_MR60FDA2::getFall() {
   return _isFall;
 }
 
@@ -208,8 +207,7 @@ bool SEEED_MR60FDC1::getFall(bool& fall_status) {
  * @retval true A human is detected.
  * @retval false No human is detected.
  */
-bool SEEED_MR60FDC1::getHuman(bool& human_status) {
-  human_status = _isHuman;
+bool SEEED_MR60FDA2::getHuman() {
   return _isHuman;
 }
 
@@ -225,7 +223,7 @@ bool SEEED_MR60FDC1::getHuman(bool& human_status) {
  * @retval true if the data is handled successfully.
  * @retval false if there is an error in handling the data.
  */
-bool SEEED_MR60FDC1::handleType(uint16_t _type, const uint8_t* data,
+bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
                                 size_t data_len) {
   TypeFallDetection type = static_cast<TypeFallDetection>(_type);
   switch (type) {

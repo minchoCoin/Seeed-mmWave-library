@@ -11,7 +11,7 @@ HardwareSerial mmWaveSerial(0);
 #  define mmWaveSerial Serial1
 #endif
 
-SEEED_MR60FDC1 mmWave;
+SEEED_MR60FDA2 mmWave;
 
 void setup() {
   bool result = false;

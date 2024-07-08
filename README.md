@@ -2,12 +2,12 @@
 
 ## Introduction
 
-This Library is designed to interface with the Seeed Studio XIAO Board on the MR60BHA2 and MR60FDC1 60GHz mmWave sensors. This library enables easy data reading and additional operations for functionalities such as breathing and heartbeat monitoring, and fall detection.
+This Library is designed to interface with the Seeed Studio XIAO Board on the MR60BHA2 and MR60FDA2 60GHz mmWave sensors. This library enables easy data reading and additional operations for functionalities such as breathing and heartbeat monitoring, and fall detection.
 
 ## Features
 
 - **Breathing and Heartbeat Monitoring (MR60BHA2)**
-- **Fall Detection (MR60FDC1)**
+- **Fall Detection (MR60FDA2)**
 
 ## Installation
 
@@ -71,7 +71,7 @@ void loop() {
 
 - **mmWaveBreath:** Demonstrates the usage of the MR60BHA2 sensor for monitoring breathing and heartbeat. It shows how to initialize the sensor, fetch data, and display breathing rate, heart rate, and phase information.
 
-- **mmWaveFall:** Illustrates how to use the MR60FDC1 sensor for fall detection. This example includes initializing the sensor and processing the fall detection data to trigger alerts.
+- **mmWaveFall:** Illustrates how to use the MR60FDA2 sensor for fall detection. This example includes initializing the sensor and processing the fall detection data to trigger alerts.
 
 - **ReadByte:** A basic example to read bytes of data from a sensor or serial input and display the raw data. Useful for debugging and understanding the data format.
 

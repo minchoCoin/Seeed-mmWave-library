@@ -1,16 +1,16 @@
 /**
- * @file SEEED_MR60FDC1.h
+ * @file SEEED_MR60FDA2.h
  * @date  02 July 2024
 
  * @author Spencer Yan
  *
- * @note Description of the file
+ * @note Seeed Studio MR60FDA2
  *
  * @copyright © 2024, Seeed Studio
  */
 
-#ifndef SEEED_MR60FDC1_H
-#define SEEED_MR60FDC1_H
+#ifndef SEEED_MR60FDA2_H
+#define SEEED_MR60FDA2_H
 
 #include "SeeedmmWave.h"
 
@@ -31,7 +31,7 @@ enum class TypeFallDetection : uint16_t {
   ReportUnmannedDetection       = 0x0F09,
 };
 
-class SEEED_MR60FDC1 : public SeeedmmWave {
+class SEEED_MR60FDA2 : public SeeedmmWave {
  private:
   /* get fall detection*/
   bool _isFall = false;
@@ -59,9 +59,9 @@ class SEEED_MR60FDC1 : public SeeedmmWave {
   bool getRadarParameters();
 
  public:
-  SEEED_MR60FDC1() {}
+  SEEED_MR60FDA2() {}
 
-  virtual ~SEEED_MR60FDC1() {}
+  virtual ~SEEED_MR60FDA2() {}
 
   bool handleType(uint16_t _type, const uint8_t* data,
                   size_t data_len) override;
@@ -82,8 +82,8 @@ class SEEED_MR60FDC1 : public SeeedmmWave {
 
   // bool get3DPointCloud(const int option);
 
-  bool getFall(bool& fall_status);
-  bool getHuman(bool& human_status);
+  bool getFall();
+  bool getHuman();
 };
 
-#endif /*SEEED_MR60FDC1_H*/
+#endif /*SEEED_MR60FDA2_H*/

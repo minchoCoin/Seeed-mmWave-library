@@ -4,10 +4,12 @@
 
 This Library is designed to interface with the Seeed Studio XIAO Board on the MR60BHA2 and MR60FDA2 60GHz mmWave sensors. This library enables easy data reading and additional operations for functionalities such as breathing and heartbeat monitoring, and fall detection.
 
-## Features
+### Supported Seeed Studio Devices
 
-- **Breathing and Heartbeat Monitoring (MR60BHA2)**
-- **Fall Detection (MR60FDA2)**
+| Device                           | Functionality                  |
+| -------------------------------- | ------------------------------ |
+| **MR60BHA2** 60GHz mmWave Sensor | Breathing and Heartbeat Module |
+| **MR60FDA2** 60GHz mmWave Sensor | Fall Detection Module          |
 
 ## Installation
 
@@ -22,13 +24,6 @@ To begin using the library, include it in your Arduino sketch and refer to the e
 ```cpp
 #include "Seeed_Arduino_mmWave.h"
 ```
-
-### Supported Seeed Studio Devices
-
-| Device                           | Functionality                  |
-| -------------------------------- | ------------------------------ |
-| **MR60BHA2** 60GHz mmWave Sensor | Breathing and Heartbeat Module |
-| **MR60FDA2** 60GHz mmWave Sensor | Fall Detection Module          |
 
 ### Examples
 

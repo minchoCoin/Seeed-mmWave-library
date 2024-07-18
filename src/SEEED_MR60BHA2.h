@@ -43,6 +43,11 @@ class SEEED_MR60BHA2 : public SeeedmmWave {
   uint32_t _rangeFlag;
   float _range;
 
+  bool _isHeartBreathPhaseValid = false;
+  bool _isBreathRateValid       = false;
+  bool _isHeartRateValid        = false;
+  bool _isDistanceValid         = false;
+
  public:
   SEEED_MR60BHA2() {}
 
@@ -52,10 +57,10 @@ class SEEED_MR60BHA2 : public SeeedmmWave {
                   size_t data_len) override;
 
   bool getHeartBreathPhases(float& total_phase, float& breath_phase,
-                            float& heart_phase) const;
-  bool getBreathRate(float& rate) const;
-  bool getHeartRate(float& rate) const;
-  bool getDistance(float& distance) const;
+                            float& heart_phase);
+  bool getBreathRate(float& rate);
+  bool getHeartRate(float& rate);
+  bool getDistance(float& distance);
 };
 
 #endif /*SEEED_MR60BHA2_H*/

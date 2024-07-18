@@ -344,22 +344,6 @@ bool SeeedmmWave::send(uint16_t type, const uint8_t* data, size_t data_len) {
   return sendFrame(frame);
 }
 
-/**
- * @brief Fetch data from the sensor.
- *
- * @attention This function attempts to fetch a frame of data from the sensor
- * within the specified timeout period.
- *
- * @param data_type The expected data type of the frame.
- * @param timeout The timeout period in milliseconds.
- * @return True if a frame is successfully fetched and processed, false
- * otherwise.
- */
-bool SeeedmmWave::fetchType(uint16_t data_type, uint32_t timeout) {
-  fetch(timeout);
-  return processQueuedFrames(data_type);
-}
-
 void SeeedmmWave::fetch(uint32_t timeout) {
   static bool startFrame = false;
   static std::vector<uint8_t> frameBuffer;
@@ -441,4 +425,9 @@ bool SeeedmmWave::processQueuedFrames(uint16_t data_type, uint32_t timeout) {
 bool SeeedmmWave::update(uint32_t timeout) {
   this->fetch(timeout);
   return processQueuedFrames(0xFFFF, timeout);
+}
+
+bool SeeedmmWave::fetchType(uint16_t data_type, uint32_t timeout) {
+  this->fetch(timeout);
+  return processQueuedFrames(data_type);
 }

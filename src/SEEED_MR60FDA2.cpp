@@ -27,8 +27,8 @@
  */
 bool SEEED_MR60FDA2::resetSetting(void) {
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::RadarInitSetting);
-  if (this->sendFrame(type, nullptr, 0)) {
-    return fetch(type, 3000);  // Timeout of 3000ms to fetch the response
+  if (this->send(type, nullptr, 0)) {
+    return this->fetchType(type, 1000);
   }
   return false;
 }
@@ -36,17 +36,18 @@ bool SEEED_MR60FDA2::resetSetting(void) {
 /**
  * @brief Set the radar installation height
  *
- * @param height 1 to 5 m
+ * @param height 1 to 5 m(not include 1.0m)
  * @retval true Set height successfully
  * @retval false Failed to set altitude
  *
  */
 bool SEEED_MR60FDA2::setInstallationHeight(const float height) {
-  uint8_t data[sizeof(float)];
-  floatToBytes(height, data);
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::InstallationHeight);
-  if (this->sendFrame(type, data, sizeof(data))) {
-    return fetch(type, 3000);  // Timeout of 3000ms to fetch the response
+
+  uint8_t data[sizeof(float)] = {0};
+  floatToBytes(height, data);
+  if (this->send(type, data, sizeof(data))) {
+    return this->fetchType(type, 1000);
   }
   return false;
 }
@@ -59,11 +60,15 @@ bool SEEED_MR60FDA2::setInstallationHeight(const float height) {
  * @note The default fall threshold of the radar is 0.6 m.
  */
 bool SEEED_MR60FDA2::setThreshold(const float threshold) {
+  uint16_t type = static_cast<uint16_t>(TypeFallDetection::FallThreshold);
+
   uint8_t data[sizeof(float)];
   floatToBytes(threshold, data);
-  uint16_t type = static_cast<uint16_t>(TypeFallDetection::FallThreshold);
-  if (this->sendFrame(type, data, sizeof(data))) {
-    return fetch(type, 40000);  // Timeout of 40000 ms to fetch the response
+  if (this->send(type, data, sizeof(data))) {
+    if (fetchType(type, 1000))  // Timeout of 5000 ms to fetch the response
+    {
+      return isThresholdValid;
+    }
   }
   return false;
 }
@@ -79,11 +84,15 @@ bool SEEED_MR60FDA2::setThreshold(const float threshold) {
  * data.
  */
 bool SEEED_MR60FDA2::setSensitivity(const uint32_t _sensitivity) {
+  uint16_t type = static_cast<uint16_t>(TypeFallDetection::FallSensitivity);
+
   uint8_t data[sizeof(uint32_t)];
   uint32ToBytes(_sensitivity, data);
-  uint16_t type = static_cast<uint16_t>(TypeFallDetection::FallSensitivity);
-  if (this->sendFrame(type, data, sizeof(data))) {
-    return fetch(type, 3000);  // Timeout of 3000ms to fetch the response
+  if (this->send(type, data, sizeof(data))) {
+    if (fetchType(type, 1000))  // Timeout of 5000 ms to fetch the response
+    {
+      return _isSensitivityValid;
+    }
   }
   return false;
 }
@@ -106,8 +115,10 @@ bool SEEED_MR60FDA2::setAlamArea(const float rect_XL, const float rect_XR,
   floatToBytes(rect_ZF, data + 2 * sizeof(float));
   floatToBytes(rect_ZB, data + 3 * sizeof(float));
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::AlarmParameters);
-  if (this->sendFrame(type, data, sizeof(data))) {
-    return fetch(type, 3000);  // Timeout of 3000ms to fetch the response
+  if (this->send(type, data, sizeof(data))) {
+    if (fetchType(type, 1000)) {
+      return _isAlarmAreaValid;
+    }
   }
   return false;
 }
@@ -123,7 +134,7 @@ bool SEEED_MR60FDA2::setAlamArea(const float rect_XL, const float rect_XR,
  */
 bool SEEED_MR60FDA2::getRadarParameters(float& height, float& threshold,
                                         uint32_t& sensitivity) {
-  getRadarParameters();
+  this->getRadarParameters();
   if (_parametersValid) {
     height           = _height;
     threshold        = _thershold;
@@ -174,8 +185,21 @@ bool SEEED_MR60FDA2::getRadarParameters(float& height, float& threshold,
  */
 bool SEEED_MR60FDA2::getRadarParameters() {
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::RadarParameters);
-  if (this->sendFrame(type, nullptr, 0)) {
-    return fetch(type, 3000);  // Timeout of 2000 ms to fetch the response
+  if (this->send(type, nullptr, 0)) {
+    return fetchType(type, 1000);
+  }
+  return false;
+}
+
+// Only supports one-way data transmission mode
+bool SEEED_MR60FDA2::setUserLog(bool flag) {
+  uint16_t type = static_cast<uint16_t>(TypeFallDetection::UserLogInfo);
+
+  uint8_t data[sizeof(uint32_t)] = {0};
+  uint32ToBytes(flag, data);
+  std::vector<uint8_t> frame = packetFrame(type, data, sizeof(data));
+  if (this->send(type, data, sizeof(data))) {
+    return true;
   }
   return false;
 }
@@ -233,7 +257,7 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
     case TypeFallDetection::InstallationHeight: {
       if (data_len != 1)
         return false;
-      _HightValid = *(const uint8_t*)data;
+      _isHeightValid = *(const uint8_t*)data;
       break;
     }
     case TypeFallDetection::RadarParameters: {

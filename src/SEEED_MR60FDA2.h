@@ -15,7 +15,7 @@
 #include "SeeedmmWave.h"
 
 enum class TypeFallDetection : uint16_t {
-  UserLogInfo = 0x0E01,
+  UserLogInfo = 0x010E,
 
   ReportFallDetection = 0x0E02,  // is_fall
   InstallationHeight  = 0x0E04,
@@ -33,12 +33,6 @@ enum class TypeFallDetection : uint16_t {
 
 class SEEED_MR60FDA2 : public SeeedmmWave {
  private:
-  /* get fall detection*/
-  bool _isFall = false;
-
-  /*set height*/
-  bool _HightValid = false;
-
   /*  get parameters */
   bool _parametersValid = false;
   float _height;
@@ -49,11 +43,15 @@ class SEEED_MR60FDA2 : public SeeedmmWave {
   float _rect_ZF;
   float _rect_ZB;
 
+  /*set height*/
+  bool _isHeightValid = false;
   bool isThresholdValid;     // 0 : Failed to obtain  1 : acquisition successful
   bool _isAlarmAreaValid;    // 0 : Failed to obtain  1 : acquisition
                              // successful
   bool _isSensitivityValid;  // 0 : Failed to obtain  1 : acquisition successful
   bool _isHuman;             // 0 : no one            1 : There is someone
+  /* get fall detection*/
+  bool _isFall = false;
 
  protected:
   bool getRadarParameters();
@@ -67,6 +65,8 @@ class SEEED_MR60FDA2 : public SeeedmmWave {
                   size_t data_len) override;
 
   bool resetSetting(void);
+
+  bool setUserLog(bool flag);
 
   bool setInstallationHeight(const float height);
   bool setThreshold(const float threshold);

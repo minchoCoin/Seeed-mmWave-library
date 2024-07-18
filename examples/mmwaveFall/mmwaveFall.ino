@@ -55,12 +55,14 @@ void setup() {
 
 void loop() {
   if (mmWave.update(100)) {
-    bool is_fall;
-    bool is_human;
-    is_human = mmWave.getHuman();
-    Serial.printf("People Exist: %s\n", is_human ? "true" : "false");
+    bool is_human = mmWave.getHuman();
+    if (is_human) {
+      Serial.printf("People Exist: %s\n", is_human ? "true" : "false");
+    }
 
-    is_fall = mmWave.getFall();
-    Serial.printf("isFall: %s\n", is_fall ? "true" : "false");
+    bool is_fall = mmWave.getFall();
+    if (is_fall) {
+      Serial.printf("isFall: %s\n", is_fall ? "true" : "false");
+    }
   }
 }

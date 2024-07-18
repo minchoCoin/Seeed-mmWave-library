@@ -28,7 +28,7 @@
 bool SEEED_MR60FDA2::resetSetting(void) {
   uint16_t type = static_cast<uint16_t>(TypeFallDetection::RadarInitSetting);
   if (this->send(type, nullptr, 0)) {
-    return this->fetchType(type, 1000);
+    return true;
   }
   return false;
 }
@@ -67,7 +67,7 @@ bool SEEED_MR60FDA2::setThreshold(const float threshold) {
   if (this->send(type, data, sizeof(data))) {
     if (fetchType(type, 1000))  // Timeout of 5000 ms to fetch the response
     {
-      return isThresholdValid;
+      return _isThresholdValid;
     }
   }
   return false;
@@ -217,6 +217,9 @@ bool SEEED_MR60FDA2::setUserLog(bool flag) {
  * @retval false The function failed to execute.
  */
 bool SEEED_MR60FDA2::getFall() {
+  if (!_isFallValid)
+    return false;
+  _isFallValid = false;
   return _isFall;
 }
 
@@ -232,6 +235,9 @@ bool SEEED_MR60FDA2::getFall() {
  * @retval false No human is detected.
  */
 bool SEEED_MR60FDA2::getHuman() {
+  if (!_isHumanValid)
+    return false;
+  _isHumanValid = false;
   return _isHuman;
 }
 
@@ -252,7 +258,12 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
   TypeFallDetection type = static_cast<TypeFallDetection>(_type);
   switch (type) {
     case TypeFallDetection::ReportFallDetection:
-      _isFall = *(const bool*)data;
+      _isFall      = *(const bool*)data;
+      _isFallValid = true;
+      break;
+    case TypeFallDetection::ReportUnmannedDetection:
+      _isHuman      = *(const uint8_t*)data;
+      _isHumanValid = true;
       break;
     case TypeFallDetection::InstallationHeight: {
       if (data_len != 1)
@@ -276,7 +287,7 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
     case TypeFallDetection::FallThreshold: {  // set fall threshold result
       if (data_len != 1)
         return false;
-      isThresholdValid = *(const uint8_t*)data;
+      _isThresholdValid = *(const uint8_t*)data;
       break;
     }
     case TypeFallDetection::AlarmParameters: {
@@ -285,9 +296,6 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
     }
     case TypeFallDetection::FallSensitivity:
       _isSensitivityValid = *(const uint8_t*)data;
-      break;
-    case TypeFallDetection::ReportUnmannedDetection:
-      _isHuman = *(const uint8_t*)data;
       break;
     default:
       return false;

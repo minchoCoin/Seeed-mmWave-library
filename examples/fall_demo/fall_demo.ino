@@ -36,7 +36,7 @@ float rect_XL, rect_XR, rect_ZF, rect_ZB;
 void setup() {
   bool result;
   Serial.begin(115200);
-  mmwave.begin(&mmwaveSerial);
+  mmWave.begin(&mmwaveSerial);
   /* init relay device*/
   relay_init();
 
@@ -52,7 +52,7 @@ void setup() {
   BH1750.start();  // start the first measurement in setup
 
   /* set mmwave-fall parameters */
-  mmwave.setUserLog(0);
+  mmWave.setUserLog(0);
 
   /** set the height of the installation **/
   if (mmWave.setInstallationHeight(height)) {
@@ -98,13 +98,16 @@ MMWAVE_STATUS status = NO_PEOPLE, last_status = NO_PEOPLE;
 
 void loop() {
   /* store as status */
-  if (mmwave.update(100)) {
-    if (mmwave.getFall()) {
-      status = PEOPLE_FALL;
-    } else if (mmwave.getHuman()) {
+  if (mmWave.update(100)) {
+    bool is_human = mmWave.getHuman();
+    bool is_fall  = mmWave.getFall();
+    
+    if (!is_human && !is_fall) {
+      status = NO_PEOPLE;
+    } else if (is_human) {
       status = EXIST_PEOPLE;
     } else {
-      status = NO_PEOPLE;
+      status = PEOPLE_FALL;
     }
   }
 

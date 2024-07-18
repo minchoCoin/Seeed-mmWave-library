@@ -34,7 +34,7 @@ enum class TypeFallDetection : uint16_t {
 class SEEED_MR60FDA2 : public SeeedmmWave {
  private:
   /*  get parameters */
-  bool _parametersValid = false;
+  bool _parametersValid = false; /* flag */
   float _height;
   float _thershold;  // deault value=0.6m
   uint32_t _sensitivity;
@@ -45,13 +45,18 @@ class SEEED_MR60FDA2 : public SeeedmmWave {
 
   /*set height*/
   bool _isHeightValid = false;
-  bool isThresholdValid;     // 0 : Failed to obtain  1 : acquisition successful
+  bool _isThresholdValid;    // 0 : Failed to obtain  1 : acquisition successful
   bool _isAlarmAreaValid;    // 0 : Failed to obtain  1 : acquisition
                              // successful
   bool _isSensitivityValid;  // 0 : Failed to obtain  1 : acquisition successful
   bool _isHuman;             // 0 : no one            1 : There is someone
+
   /* get fall detection*/
   bool _isFall = false;
+
+  /* additional flags*/
+  bool _isHumanValid = false;
+  bool _isFallValid  = false;
 
  protected:
   bool getRadarParameters();

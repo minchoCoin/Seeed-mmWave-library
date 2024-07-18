@@ -14,56 +14,42 @@ HardwareSerial mmWaveSerial(0);
 SEEED_MR60FDA2 mmWave;
 
 void setup() {
-  bool result = false;
   Serial.begin(115200);
-  while (!Serial)
-    continue;
   mmWave.begin(&mmWaveSerial);
-  delay(3000);
-  float height         = 2.2;
-  float threshold      = 1.0;
+
+  delay(1000);
+
   uint32_t sensitivity = 15;
-
-  result = mmWave.setUserLog(0);
-
-  result ? Serial.println("setUserLog success")
-         : Serial.println("setUserLog failed");
-
-  /**
-   * @brief Set the radar installation height, ranging from 1 to 5m.
-   */
-  do {
-    result = mmWave.setInstallationHeight(height);  // 3m
-
-    result ? Serial.println("setInstallationHeight success")
-           : Serial.println("setInstallationHeight failed");
-    delay(3000);
-  } while (!result);
-
-  /**
-   * @brief Set fall threshold
-   * @note The default fall threshold of the radar is 0.6 m.
-   */
-  result = mmWave.setThreshold(threshold);
-
-  result ? Serial.println("setThreshold success")
-         : Serial.println("setThreshold failed");
-
-  result = mmWave.setSensitivity(sensitivity);
-  result ? Serial.println("setSensitivity success")
-         : Serial.println("setSensitivity failed");
-
+  float height = 3.0, threshold = 1.0;
   float rect_XL, rect_XR, rect_ZF, rect_ZB;
-  result = mmWave.getRadarParameters(height, threshold, sensitivity, rect_XL,
-                                     rect_XR, rect_ZF, rect_ZB);
-  result ? Serial.println("getRadarParameters success")
-         : Serial.println("getRadarParameters failed");
-  if (result) {
+
+  if (mmWave.setInstallationHeight(height)) {
+    Serial.printf("setInstallationHeight success: %.2f\n", height);
+  } else {
+    Serial.println("setInstallationHeight failed");
+  }
+
+  if (mmWave.setThreshold(threshold)) {
+    Serial.printf("setThreshold success: %.2f\n", threshold);
+  } else {
+    Serial.println("setThreshold failed");
+  }
+
+  if (mmWave.setSensitivity(sensitivity)) {
+    Serial.printf("setSensitivity success %d\n", sensitivity);
+  } else {
+    Serial.println("setSensitivity failed");
+  }
+
+  if (mmWave.getRadarParameters(height, threshold, sensitivity, rect_XL,
+                                rect_XR, rect_ZF, rect_ZB)) {
     Serial.printf("height: %.2f\tthreshold: %.2f\tsensitivity: %d\n", height,
                   threshold, sensitivity);
     Serial.printf(
         "rect_XL: %.2f\trect_XR: %.2f\trect_ZF: %.2f\trect_ZB: %.2f\n", rect_XL,
         rect_XR, rect_ZF, rect_ZB);
+  } else {
+    Serial.println("getRadarParameters failed");
   }
 }
 
@@ -77,5 +63,4 @@ void loop() {
     is_fall = mmWave.getFall();
     Serial.printf("isFall: %s\n", is_fall ? "true" : "false");
   }
-  delay(10);
 }

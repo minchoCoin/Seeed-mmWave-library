@@ -14,12 +14,12 @@ HardwareSerial mmWaveSerial(0);
 SEEED_MR60BHA2 mmWave;
 
 void setup() {
-  mmWave.begin(&mmWaveSerial);
   Serial.begin(115200);
+  mmWave.begin(&mmWaveSerial);
 }
 
 void loop() {
-  if (mmWave.fetch()) {
+  if (mmWave.update(100)) {
     float total_phase, breath_phase, heart_phase;
     if (mmWave.getHeartBreathPhases(total_phase, breath_phase, heart_phase)) {
       Serial.printf("total_phase: %.2f\t", total_phase);

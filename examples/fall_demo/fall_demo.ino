@@ -17,7 +17,7 @@ HardwareSerial mmwaveSerial(0);
 
 hp_BH1750 BH1750;  // create the sensor object
 
-SEEED_MR60FDA2 mmwave;
+SEEED_MR60FDA2 mmWave;
 
 Adafruit_NeoPixel pixels =
     Adafruit_NeoPixel(1, /* pixelPin */ D1, NEO_GRB + NEO_KHZ800);

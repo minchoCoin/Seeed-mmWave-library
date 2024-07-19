@@ -30,8 +30,10 @@ void relay_off();
 
 /****** variables ******/
 uint32_t sensitivity = 15;
-float height = 3.0, threshold = 1.0;
+float height = 2.8, threshold = 1.0;
 float rect_XL, rect_XR, rect_ZF, rect_ZB;
+
+const uint8_t dark_lux = 10;
 
 void setup() {
   bool result;
@@ -47,10 +49,11 @@ void setup() {
   pixels.setPixelColor(0, pixels.Color(125, 125, 125));
 
   /* init built-in light ambient light sensor */
-  bool avail = BH1750.begin(BH1750_TO_GROUND);  // will be false no sensor found
-                                                // | already connected to I2C
-  BH1750.start();  // start the first measurement in setup
-
+  BH1750.begin(BH1750_TO_GROUND);  // will be false no sensor found
+                                   // | already connected to I2C
+  BH1750.calibrateTiming();
+  BH1750.start(BH1750_QUALITY_HIGH2,
+               254);  // start the first measurement in setup
   /* set mmwave-fall parameters */
   mmWave.setUserLog(0);
 
@@ -95,22 +98,29 @@ typedef enum {
 } MMWAVE_STATUS;
 
 MMWAVE_STATUS status = NO_PEOPLE, last_status = NO_PEOPLE;
-
+float lux = 100;
 void loop() {
-  /* store as status */
+  /* get status */
   if (mmWave.update(100)) {
     bool is_human = mmWave.getHuman();
     bool is_fall  = mmWave.getFall();
-    
+
     if (!is_human && !is_fall) {
       status = NO_PEOPLE;
-    } else if (is_human) {
-      status = EXIST_PEOPLE;
-    } else {
+    } else if (is_fall) {
       status = PEOPLE_FALL;
+    } else {
+      status = EXIST_PEOPLE;
     }
   }
 
+  /* update lux value */
+  if (BH1750.hasValue() == true) {
+    lux = BH1750.getLux();
+    BH1750.start(BH1750_QUALITY_HIGH2, 254);
+  }
+
+  /* change interactive Light*/
   if (status != last_status) {  // switching LED
     switch (status) {
       case NO_PEOPLE:
@@ -129,32 +139,29 @@ void loop() {
     last_status = status;
   }
 
+  Serial.print("LUX: ");
+  Serial.print(lux);
+  Serial.print("\t");
+
   switch (status) {
     case NO_PEOPLE:
-      Serial.println("Waiting for people");
+      Serial.printf("Waiting for people");
       break;
     case EXIST_PEOPLE:
-      Serial.println("PEOPLE !!!");
+      Serial.printf("PEOPLE !!!");
       break;
     case PEOPLE_FALL:
-      Serial.println("FALL !!!");
+      Serial.printf("FALL !!!");
       break;
     default:
       break;
   }
+  Serial.print("\n");
 
-  if (BH1750.hasValue() == true) {  // non blocking reading
-    float lux = BH1750.getLux();
-    Serial.print("LUX: ");
-    Serial.print(lux);
-    Serial.print("\n");
-    Serial.println(lux);
-    if ((status == EXIST_PEOPLE || status == PEOPLE_FALL) && lux < 135) {
-      relay_on();
-    } else {
-      relay_off();
-    }
-    BH1750.start();
+  if ((status == EXIST_PEOPLE || status == PEOPLE_FALL) && lux < dark_lux) {
+    relay_on();
+  } else {
+    relay_off();
   }
 }
 

@@ -45,9 +45,9 @@ void setup() {
   /* init RGB LED */
   pixels.begin();
   pixels.clear();
+  pixels.setBrightness(8);
   pixels.show();
   pixels.setPixelColor(0, pixels.Color(125, 125, 125));
-
   /* init built-in light ambient light sensor */
   BH1750.begin(BH1750_TO_GROUND);  // will be false no sensor found
                                    // | already connected to I2C
@@ -102,23 +102,45 @@ float lux = 100;
 void loop() {
   /* get status */
   if (mmWave.update(100)) {
-    bool is_human = mmWave.getHuman();
-    bool is_fall  = mmWave.getFall();
-
-    if (!is_human && !is_fall) {
-      status = NO_PEOPLE;
+    bool is_human, is_fall;
+    // Get the human detection status
+    if (mmWave.getHuman(is_human)) {
+      // Get the fall detection status
+      if (mmWave.getFall(is_fall)) {
+        // Determine the status based on human and fall detection
+        if (!is_human && !is_fall) {
+          status = NO_PEOPLE;  // No human and no fall detected
+        } else if (is_fall) {
+          status = PEOPLE_FALL;  // Fall detected
+        } else {
+          status = EXIST_PEOPLE;  // Human detected without fall
+        }
+      }
+    }
+    // Get the human detection status
+    if (!mmWave.getHuman(is_human) && !mmWave.getFall(is_fall)) {
+      status = NO_PEOPLE;  // No human and no fall detected
     } else if (is_fall) {
-      status = PEOPLE_FALL;
+      status = PEOPLE_FALL;  // Fall detected
     } else {
-      status = EXIST_PEOPLE;
+      status = EXIST_PEOPLE;  // Human detected without fall
     }
   }
 
-  /* update lux value */
-  if (BH1750.hasValue() == true) {
-    lux = BH1750.getLux();
-    BH1750.start(BH1750_QUALITY_HIGH2, 254);
+  switch (status) {
+    case NO_PEOPLE:
+      Serial.printf("Waiting for people");
+      break;
+    case EXIST_PEOPLE:
+      Serial.printf("PEOPLE !!!");
+      break;
+    case PEOPLE_FALL:
+      Serial.printf("FALL !!!");
+      break;
+    default:
+      break;
   }
+  Serial.print("\n");
 
   /* change interactive Light*/
   if (status != last_status) {  // switching LED
@@ -139,24 +161,15 @@ void loop() {
     last_status = status;
   }
 
+  /* update lux value */
+  if (BH1750.hasValue() == true) {
+    lux = BH1750.getLux();
+    BH1750.start(BH1750_QUALITY_HIGH2, 254);
+  }
+
   Serial.print("LUX: ");
   Serial.print(lux);
   Serial.print("\t");
-
-  switch (status) {
-    case NO_PEOPLE:
-      Serial.printf("Waiting for people");
-      break;
-    case EXIST_PEOPLE:
-      Serial.printf("PEOPLE !!!");
-      break;
-    case PEOPLE_FALL:
-      Serial.printf("FALL !!!");
-      break;
-    default:
-      break;
-  }
-  Serial.print("\n");
 
   if ((status == EXIST_PEOPLE || status == PEOPLE_FALL) && lux < dark_lux) {
     relay_on();

@@ -216,10 +216,14 @@ bool SEEED_MR60FDA2::setUserLog(bool flag) {
  * updated.
  * @retval false The function failed to execute.
  */
+bool SEEED_MR60FDA2::getFall(bool &is_fall) {
+  // if (!_isFallValid)
+  //   return false;
+  // _isFallValid = false;
+  is_fall = _isFall;
+  return is_fall;
+}
 bool SEEED_MR60FDA2::getFall() {
-  if (!_isFallValid)
-    return false;
-  _isFallValid = false;
   return _isFall;
 }
 
@@ -234,10 +238,14 @@ bool SEEED_MR60FDA2::getFall() {
  * @retval true A human is detected.
  * @retval false No human is detected.
  */
+bool SEEED_MR60FDA2::getHuman(bool &is_human) {
+  // if (!_isHumanValid)
+  //   return false;
+  // _isHumanValid = false;
+  is_human = _isHuman;
+  return is_human;
+}
 bool SEEED_MR60FDA2::getHuman() {
-  if (!_isHumanValid)
-    return false;
-  _isHumanValid = false;
   return _isHuman;
 }
 
@@ -301,4 +309,11 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
       return false;
   }
   return true;
+}
+
+bool SEEED_MR60FDA2::getFallInternal() {
+  if (!_isFallValid)
+    return false;
+  _isFallValid = false;
+  return _isFall;
 }

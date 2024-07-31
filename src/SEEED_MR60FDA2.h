@@ -58,6 +58,7 @@ class SEEED_MR60FDA2 : public SeeedmmWave {
   bool _isHumanValid = false;
   bool _isFallValid  = false;
 
+  bool getFallInternal();
  protected:
   bool getRadarParameters();
 
@@ -87,8 +88,8 @@ class SEEED_MR60FDA2 : public SeeedmmWave {
 
   // bool get3DPointCloud(const int option);
 
-  bool getFall();
-  bool getHuman();
+  bool getFall(bool &is_fall);
+  bool getHuman(bool &is_human);
 };
 
 #endif /*SEEED_MR60FDA2_H*/

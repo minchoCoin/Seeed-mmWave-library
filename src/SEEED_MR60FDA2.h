@@ -90,6 +90,8 @@ class SEEED_MR60FDA2 : public SeeedmmWave {
 
   bool getFall(bool &is_fall);
   bool getHuman(bool &is_human);
+  bool getFall();
+  bool getHuman();
 };
 
 #endif /*SEEED_MR60FDA2_H*/

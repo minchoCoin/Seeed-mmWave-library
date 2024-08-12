@@ -87,7 +87,7 @@ void setup() {
 }
 
 void loop() {
-  if (mmWave.fetch()) {
+  if (mmWave.update(100)) {
     float breath_rate = 0;
     float heart_rate  = 0;
     float distance    = 0;

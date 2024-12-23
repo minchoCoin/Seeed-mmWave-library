@@ -43,6 +43,7 @@ bool SEEED_MR60BHA2::handleType(uint16_t _type, const uint8_t* data,
     case TypeHeartBreath::ReportHumanDetection: {
       _isHumanDetected = data[0];
       _isHumanDetectionValid = true;
+      break;
     }
     case TypeHeartBreath::Report3DPointCloudDetection: {
       _people_counting_point_cloud.target_num = extractU32(data);
@@ -124,5 +125,6 @@ bool SEEED_MR60BHA2::getPeopleCountingTartgetInfo(PeopleCounting& target_info) {
 bool SEEED_MR60BHA2::isHumanDetected() {
   if (!_isHumanDetectionValid)
     return false;
+  _isHumanDetectionValid = false;
   return _isHumanDetected;
 }

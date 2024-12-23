@@ -20,6 +20,10 @@ void setup() {
 
 void loop() {
   if (mmWave.update(100)) {
+    if (mmWave.isHumanDetected()) {
+        Serial.printf("-----Human Detected-----\n");
+    }
+
     PeopleCounting point_cloud;
     if (mmWave.getPeopleCountingPointCloud(point_cloud)) {
         Serial.printf("-----Got a Point Cloud-----\n");
@@ -39,5 +43,7 @@ void loop() {
         Serial.printf("dop_index: %d\n", target_info.dop_index);
         Serial.printf("cluster_index: %d\n", target_info.cluster_index);
     }
+    
+    delay(500);
   }
 }

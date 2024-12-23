@@ -40,6 +40,28 @@ bool SEEED_MR60BHA2::handleType(uint16_t _type, const uint8_t* data,
       _isDistanceValid = true;
       break;
     }
+    case TypeHeartBreath::ReportHumanDetection: {
+      _isHumanDetected = data[0];
+      _isHumanDetectionValid = true;
+    }
+    case TypeHeartBreath::Report3DPointCloudDetection: {
+      _people_counting_point_cloud.target_num = extractU32(data);
+      _people_counting_point_cloud.x_point = extractFloat(data + sizeof(uint32_t));
+      _people_counting_point_cloud.y_point = extractFloat(data + sizeof(uint32_t) + sizeof(float));
+      _people_counting_point_cloud.dop_index = extractU32(data + sizeof(uint32_t) + 2 * sizeof(float));
+      _people_counting_point_cloud.cluster_index = extractU32(data + 2 * sizeof(uint32_t) + 2 * sizeof(float));
+      _isPeopleCountingPointCloudValid = true;
+      break;
+    }
+    case TypeHeartBreath::Report3DPointCloudTartgetInfo: {
+      _people_counting_target_info.target_num = extractU32(data);
+      _people_counting_target_info.x_point = extractFloat(data + sizeof(uint32_t));
+      _people_counting_target_info.y_point = extractFloat(data + sizeof(uint32_t) + sizeof(float));
+      _people_counting_target_info.dop_index = extractU32(data + sizeof(uint32_t) + 2 * sizeof(float));
+      _people_counting_target_info.cluster_index = extractU32(data + 2 * sizeof(uint32_t) + 2 * sizeof(float));
+      _isPeopleCountingTartgetInfoValid = true;
+      break;
+    }
     default:
       return false;  // Unhandled type
   }
@@ -81,4 +103,26 @@ bool SEEED_MR60BHA2::getDistance(float& distance) {
   _isDistanceValid = false;
   distance         = _range;
   return true;
+}
+
+bool SEEED_MR60BHA2::getPeopleCountingPointCloud(PeopleCounting& point_cloud) {
+  if (!_isPeopleCountingPointCloudValid)
+    return false;
+  _isPeopleCountingPointCloudValid = false;
+  point_cloud = _people_counting_point_cloud;
+  return true;
+}
+
+bool SEEED_MR60BHA2::getPeopleCountingTartgetInfo(PeopleCounting& target_info) {
+  if (!_isPeopleCountingTartgetInfoValid)
+    return false;
+  _isPeopleCountingTartgetInfoValid = false;
+  target_info = _people_counting_target_info;
+  return true;
+}
+
+bool SEEED_MR60BHA2::isHumanDetected() {
+  if (!_isHumanDetectionValid)
+    return false;
+  return _isHumanDetected;
 }

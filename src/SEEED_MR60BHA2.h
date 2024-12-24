@@ -15,6 +15,10 @@
 
 #include "SeeedmmWave.h"
 
+#define MAX_TARGET_NUM    3
+
+#define RANGE_STEP 17.28f
+
 enum class TypeHeartBreath : uint16_t {
   TypeHeartBreathPhase    = 0x0A13,
   TypeBreathRate          = 0x0A14,
@@ -31,12 +35,15 @@ typedef struct HeartBreath {
   float heart_phase;
 } HeartBreath;
 
-typedef struct PeopleCounting {
-  uint32_t target_num;
+typedef struct TargetN {
   float x_point;
   float y_point;
-  uint32_t dop_index;
-  uint32_t cluster_index;
+  int32_t dop_index;
+  int32_t cluster_index;
+} TargetN;
+
+typedef struct PeopleCounting {
+  std::vector<TargetN> targets;
 } PeopleCounting;
 
 class SEEED_MR60BHA2 : public SeeedmmWave {

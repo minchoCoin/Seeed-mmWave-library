@@ -15,11 +15,18 @@
 
 #include "SeeedmmWave.h"
 
+#define MAX_TARGET_NUM    3
+
+#define RANGE_STEP 17.28f
+
 enum class TypeHeartBreath : uint16_t {
   TypeHeartBreathPhase    = 0x0A13,
   TypeBreathRate          = 0x0A14,
   TypeHeartRate           = 0x0A15,
   TypeHeartBreathDistance = 0x0A16,
+  Report3DPointCloudDetection   = 0x0A08,
+  Report3DPointCloudTartgetInfo = 0x0A04,
+  ReportHumanDetection       = 0x0F09,
 };
 
 typedef struct HeartBreath {
@@ -27,6 +34,17 @@ typedef struct HeartBreath {
   float breath_phase;
   float heart_phase;
 } HeartBreath;
+
+typedef struct TargetN {
+  float x_point;
+  float y_point;
+  int32_t dop_index;
+  int32_t cluster_index;
+} TargetN;
+
+typedef struct PeopleCounting {
+  std::vector<TargetN> targets;
+} PeopleCounting;
 
 class SEEED_MR60BHA2 : public SeeedmmWave {
  private:
@@ -42,6 +60,18 @@ class SEEED_MR60BHA2 : public SeeedmmWave {
   /* HeartBreathDistance */
   uint32_t _rangeFlag;
   float _range;
+
+  /* HumanDetection */
+  bool _isHumanDetected;             // 0 : no one            1 : There is someone
+  bool _isHumanDetectionValid;
+
+  /* PeopleCounting PointCloud */
+  PeopleCounting _people_counting_point_cloud;
+  bool _isPeopleCountingPointCloudValid;
+ 
+  /* PeopleCounting TartgetInfo */
+  PeopleCounting _people_counting_target_info;
+  bool _isPeopleCountingTartgetInfoValid;
 
   bool _isHeartBreathPhaseValid = false;
   bool _isBreathRateValid       = false;
@@ -61,6 +91,9 @@ class SEEED_MR60BHA2 : public SeeedmmWave {
   bool getBreathRate(float& rate);
   bool getHeartRate(float& rate);
   bool getDistance(float& distance);
+  bool getPeopleCountingPointCloud(PeopleCounting& point_cloud);
+  bool getPeopleCountingTartgetInfo(PeopleCounting& target_info);
+  bool isHumanDetected();
 };
 
 #endif /*SEEED_MR60BHA2_H*/

@@ -2,18 +2,18 @@
 
 ## Introduction
 
-This Library is designed to interface with the Seeed Studio XIAO Board on the MR60BHA2 and MR60FDA2 60GHz mmWave sensors. This library enables easy data reading and additional operations for functionalities such as breathing and heartbeat monitoring, and fall detection.
+This Library is designed to interface with the Seeed Studio XIAO ESP32-C6 Board integrated on the [MR60BHA2-XIAO 60GHz mmWave Human Breathing and Heartbeat Sensor](https://www.seeedstudio.com/MR60BHA2-60GHz-mmWave-Sensor-Breathing-and-Heartbeat-Module-p-5945.html) and [MR60FDA2-XIAO 60GHz mmWave Human Fall Detection Sensor](https://www.seeedstudio.com/MR60FDA2-60GHz-mmWave-Sensor-Fall-Detection-Module-p-5946.html)  sensors. This library enables easy data reading and additional operations for functionalities such as breathing and heartbeat monitoring, and fall detection.
 
 ### Supported Seeed Studio Devices
 
 | Device                           | Functionality                  |
 | -------------------------------- | ------------------------------ |
-| **MR60BHA2** 60GHz mmWave Sensor | Breathing and Heartbeat Module |
-| **MR60FDA2** 60GHz mmWave Sensor | Fall Detection Module          |
+| [**MR60BHA2** 60GHz mmWave Sensor](https://www.seeedstudio.com/MR60BHA2-60GHz-mmWave-Sensor-Breathing-and-Heartbeat-Module-p-5945.html) | Breathing and Heartbeat Module |
+| [**MR60FDA2** 60GHz mmWave Sensor](https://www.seeedstudio.com/MR60FDA2-60GHz-mmWave-Sensor-Fall-Detection-Module-p-5946.html) | Fall Detection Module          |
 
 ## Installation
 
-1. Download the library from GitHub or the Arduin Library Manager.
+1. Download the library from GitHub or the Arduino Library Manager.
 2. Open the Arduino IDE.
 3. Go to `Sketch` > `Include Library` > `Add .ZIP Library...` and select the downloaded file.
 

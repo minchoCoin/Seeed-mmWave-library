@@ -51,6 +51,34 @@ If you'd like to watch the debug info, Set _MMWAVE_DEBUG to 1 in SeeedmmWave.h
 - **PointCloud:** Illustrates how to use the MR60FDA2 sensor for getting point cloud
 
 - **gui_firmware:** ESP32C6 firmware for using [GUI Software](https://wiki.seeedstudio.com/getting_started_with_mr60fda2_mmwave_kit/#resources)
+
+### PointCloud output example
+```
+16:55:06.157 -> ESP-ROM:esp32c6-20220919
+16:55:06.390 -> height: 2.80	threshold: 0.50	sensitivity: 3
+16:55:06.390 -> rect_XL: 0.30	rect_XR: 0.30	rect_ZF: 0.30	rect_ZB: 0.30
+16:55:08.515 -> Number of targets: 3
+16:55:08.515 -> Target 1:
+16:55:08.515 ->   x_point: 0.14
+16:55:08.515 ->   y_point: 0.51
+16:55:08.515 ->   dop_index: 0.033011
+16:55:08.515 ->   cluster_index: 0.000000
+16:55:08.515 ->   move_speed: 0.57 cm/s
+16:55:08.515 -> Target 2:
+16:55:08.515 ->   x_point: 0.00
+16:55:08.515 ->   y_point: 0.13
+16:55:08.515 ->   dop_index: 0.588328
+16:55:08.515 ->   cluster_index: 0.000000
+16:55:08.515 ->   move_speed: 10.17 cm/s
+16:55:08.515 -> Target 3:
+16:55:08.515 ->   x_point: 0.01
+16:55:08.515 ->   y_point: 0.00
+16:55:08.515 ->   dop_index: 0.101009
+16:55:08.515 ->   cluster_index: 0.000000
+16:55:08.515 ->   move_speed: 1.75 cm/s
+...
+```
+
 ## API Reference
 
 Please refer to the comments in the source code for detailed information on the available methods and parameters.

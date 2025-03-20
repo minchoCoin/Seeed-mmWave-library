@@ -20,26 +20,8 @@ void setup() {
   Serial.begin(115200);
   mmWave.begin(&mmWaveSerial);
   mmWave.setUserLog(1);
-  /** set the height of the installation **/
-  if (mmWave.setInstallationHeight(height)) {
-    Serial.printf("setInstallationHeight success: %.2f\n", height);
-  } else {
-    Serial.println("setInstallationHeight failed");
-  }
-
-  /** Set threshold **/
-  if (mmWave.setThreshold(threshold)) {
-    Serial.printf("setThreshold success: %.2f\n", threshold);
-  } else {
-    Serial.println("setThreshold failed");
-  }
-
-  /** Set sensitivity **/
-  if (mmWave.setSensitivity(sensitivity)) {
-    Serial.printf("setSensitivity success %d\n", sensitivity);
-  } else {
-    Serial.println("setSensitivity failed");
-  }
+  
+ 
 
   /** get new parameters of mmwave **/
   if (mmWave.getRadarParameters(height, threshold, sensitivity, rect_XL,
@@ -56,6 +38,7 @@ void setup() {
 
 void loop() {
   if (mmWave.update(100)) {
+    
     PeopleCounting target_info;
     if (mmWave.getPeopleCountingPointCloud(target_info)) {
       //Serial.printf("-----Got Target Info-----\n");
@@ -68,8 +51,8 @@ void loop() {
         Serial.printf("Target %zu:\n", i + 1);
         Serial.printf("  x_point: %.2f\n", target.x_point);
         Serial.printf("  y_point: %.2f\n", target.y_point);
-        Serial.printf("  dop_index: %d\n", target.dop_index);
-        Serial.printf("  cluster_index: %d\n", target.cluster_index);
+        Serial.printf("  dop_index: %f\n", target.dop_index);
+        Serial.printf("  cluster_index: %f\n", target.cluster_index);
         Serial.printf("  move_speed: %.2f cm/s\n",
                       target.dop_index * RANGE_STEP);
       }

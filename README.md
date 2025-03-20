@@ -25,6 +25,13 @@ To begin using the library, include it in your Arduino sketch and refer to the e
 #include "Seeed_Arduino_mmWave.h"
 ```
 
+If you'd like to watch the debug info, Set _MMWAVE_DEBUG to 1 in SeeedmmWave.h
+
+```cpp
+#define _MMWAVE_DEBUG 1
+// src/SeeedmmWave.h
+```
+
 ### Examples
 
 - **GroveU8x8:** Demonstrates how to utilize Grove GPIO pins to interface with the Grove - OLED Display 0.96" using the U8x8 library. This example shows basic text display functions.

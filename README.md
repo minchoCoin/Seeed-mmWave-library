@@ -96,6 +96,13 @@ If you'd like to watch the debug info, Set _MMWAVE_DEBUG to 1 in SeeedmmWave.h
 ...
 ```
 
+
+### PointCloudChart Demo video and sample
+- [https://youtu.be/nghvNvRgPC0](https://youtu.be/nghvNvRgPC0)
+- [https://youtube.com/shorts/jPIVUtv3SSc?feature=share](https://youtube.com/shorts/jPIVUtv3SSc?feature=share)
+
+Please see PointCloudChart_demo_ino.ino and PointCloudChart_realtime.py
+
 ## API Reference
 
 Please refer to the comments in the source code for detailed information on the available methods and parameters.

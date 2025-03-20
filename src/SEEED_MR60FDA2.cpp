@@ -305,11 +305,96 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
     case TypeFallDetection::FallSensitivity:
       _isSensitivityValid = *(const uint8_t*)data;
       break;
+    case TypeFallDetection::Report3DPointCloudDetection: {
+        size_t target_num = extractU32(data);  // Extract target quantity
+        data += sizeof(uint32_t);
+  
+        std::vector<TargetN> received_targets; // Used to store parsed target data
+        received_targets.reserve(target_num);
+  
+        for(size_t i = 0; i < target_num; i++)
+        {
+          TargetN target;
+          target.x_point = extractFloat(data);
+          data += sizeof(float);
+  
+          target.y_point = extractFloat(data);
+          data += sizeof(float);
+  
+          target.dop_index = extractU32(data);
+          data += sizeof(int32_t);
+  
+          target.cluster_index = extractU32(data);
+          data += sizeof(int32_t);
+  
+          received_targets.push_back(target); // Add the resolved target to the container
+        }
+  
+        // Store the received target data in the PeopleCounting object
+        _people_counting_point_cloud.targets = std::move(received_targets);
+        _isPeopleCountingPointCloudValid = true;
+  
+        break;
+      }
+
+      case TypeFallDetection::Report3DPointCloudTartgetInfo: {
+        size_t target_num = extractU32(data);  // Extract target quantity
+        data += sizeof(uint32_t);
+  
+        std::vector<TargetN> received_targets; // Used to store parsed target data
+        received_targets.reserve(target_num);
+  
+        for(size_t i = 0; i < target_num; i++)
+        {
+          TargetN target;
+          target.x_point = extractFloat(data);
+          data += sizeof(float);
+  
+          target.y_point = extractFloat(data);
+          data += sizeof(float);
+  
+          target.dop_index = extractU32(data);
+          data += sizeof(int32_t);
+  
+          target.cluster_index = extractU32(data);
+          data += sizeof(int32_t);
+  
+          received_targets.push_back(target); // Add the resolved target to the container
+        }
+  
+        // Store the received target data in the PeopleCounting object
+        _people_counting_target_info.targets = std::move(received_targets);
+        _isPeopleCountingTartgetInfoValid = true;
+  
+        break;
+      }
     default:
       return false;
   }
   return true;
 }
+
+bool SEEED_MR60FDA2::getPeopleCountingPointCloud(PeopleCounting& point_cloud) {
+
+  if (!_isPeopleCountingPointCloudValid)
+    return false;
+  _isPeopleCountingPointCloudValid = false;
+  point_cloud = std::move(_people_counting_point_cloud);
+  return true;
+}
+
+bool SEEED_MR60FDA2::getPeopleCountingTartgetInfo(PeopleCounting& target_info) {
+  
+  if (!_isPeopleCountingTartgetInfoValid)
+    return false;
+  _isPeopleCountingTartgetInfoValid = false;
+  target_info = std::move(_people_counting_target_info);
+  return true;
+}
+
+
+
+
 
 bool SEEED_MR60FDA2::getFallInternal() {
   if (!_isFallValid)

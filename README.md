@@ -54,28 +54,45 @@ If you'd like to watch the debug info, Set _MMWAVE_DEBUG to 1 in SeeedmmWave.h
 
 ### PointCloud output example
 ```
-16:55:06.157 -> ESP-ROM:esp32c6-20220919
-16:55:06.390 -> height: 2.80	threshold: 0.50	sensitivity: 3
-16:55:06.390 -> rect_XL: 0.30	rect_XR: 0.30	rect_ZF: 0.30	rect_ZB: 0.30
-16:55:08.515 -> Number of targets: 3
-16:55:08.515 -> Target 1:
-16:55:08.515 ->   x_point: 0.14
-16:55:08.515 ->   y_point: 0.51
-16:55:08.515 ->   dop_index: 0.033011
-16:55:08.515 ->   cluster_index: 0.000000
-16:55:08.515 ->   move_speed: 0.57 cm/s
-16:55:08.515 -> Target 2:
-16:55:08.515 ->   x_point: 0.00
-16:55:08.515 ->   y_point: 0.13
-16:55:08.515 ->   dop_index: 0.588328
-16:55:08.515 ->   cluster_index: 0.000000
-16:55:08.515 ->   move_speed: 10.17 cm/s
-16:55:08.515 -> Target 3:
-16:55:08.515 ->   x_point: 0.01
-16:55:08.515 ->   y_point: 0.00
-16:55:08.515 ->   dop_index: 0.101009
-16:55:08.515 ->   cluster_index: 0.000000
-16:55:08.515 ->   move_speed: 1.75 cm/s
+17:41:02.478 -> ESP-ROM:esp32c6-20220919
+17:41:02.478 -> height: 2.80	threshold: 0.50	sensitivity: 3
+17:41:02.478 -> rect_XL: 0.30	rect_XR: 0.30	rect_ZF: 0.30	rect_ZB: 0.30
+17:41:04.311 -> Number of targets: 5
+17:41:04.311 -> Target 1:
+17:41:04.311 ->   x_point: 0.17
+17:41:04.311 ->   y_point: 0.50
+17:41:04.311 ->   z_point: 0.00
+17:41:04.311 ->   dop_index: 0.018602
+17:41:04.311 ->   cluster_index: 0.000000
+17:41:04.311 ->   move_speed: 0.32 cm/s
+17:41:04.311 -> Target 2:
+17:41:04.353 ->   x_point: -0.21
+17:41:04.353 ->   y_point: 0.35
+17:41:04.353 ->   z_point: 0.20
+17:41:04.353 ->   dop_index: 0.037204
+17:41:04.353 ->   cluster_index: 0.000000
+17:41:04.353 ->   move_speed: 0.64 cm/s
+17:41:04.353 -> Target 3:
+17:41:04.353 ->   x_point: -0.06
+17:41:04.353 ->   y_point: 0.46
+17:41:04.353 ->   z_point: 0.25
+17:41:04.353 ->   dop_index: 0.037204
+17:41:04.353 ->   cluster_index: 0.000000
+17:41:04.353 ->   move_speed: 0.64 cm/s
+17:41:04.353 -> Target 4:
+17:41:04.353 ->   x_point: -0.27
+17:41:04.353 ->   y_point: 0.30
+17:41:04.353 ->   z_point: 0.20
+17:41:04.353 ->   dop_index: 0.046505
+17:41:04.353 ->   cluster_index: 0.000000
+17:41:04.353 ->   move_speed: 0.80 cm/s
+17:41:04.353 -> Target 5:
+17:41:04.353 ->   x_point: -0.29
+17:41:04.353 ->   y_point: 0.44
+17:41:04.353 ->   z_point: -0.00
+17:41:04.353 ->   dop_index: 0.046505
+17:41:04.353 ->   cluster_index: 0.000000
+17:41:04.353 ->   move_speed: 0.80 cm/s
 ...
 ```
 

@@ -328,6 +328,9 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
   
           target.y_point = extractFloat(data);
           data += sizeof(float);
+
+          target.z_point = extractFloat(data);
+          data += sizeof(float);
   
           target.dop_index = extractFloat(data);
           data += sizeof(float);
@@ -363,6 +366,9 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
           target.y_point = extractFloat(data);
           data += sizeof(float);
   
+          target.z_point = extractFloat(data);
+          data += sizeof(float);
+
           target.dop_index = extractFloat(data);
           data += sizeof(float);
   

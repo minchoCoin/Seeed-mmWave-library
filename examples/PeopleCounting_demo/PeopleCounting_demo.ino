@@ -34,6 +34,7 @@ void loop() {
             Serial.printf("Target %zu:\n", i + 1);
             Serial.printf("  x_point: %.2f\n", target.x_point);
             Serial.printf("  y_point: %.2f\n", target.y_point);
+            Serial.printf("  z_point: %.2f\n", target.z_point);
             Serial.printf("  dop_index: %d\n", target.dop_index);
             Serial.printf("  cluster_index: %d\n", target.cluster_index);
             Serial.printf("  move_speed: %.2f cm/s\n", target.dop_index * RANGE_STEP);

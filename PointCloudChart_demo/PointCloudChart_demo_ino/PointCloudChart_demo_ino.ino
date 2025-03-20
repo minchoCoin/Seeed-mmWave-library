@@ -53,7 +53,7 @@ void loop() {
           Serial.printf("\"z_point\": %.2f,", target.z_point);
           Serial.printf("\"dop_index\": %f,", target.dop_index);
           Serial.printf("\"cluster_index\": %f,", target.cluster_index);
-          Serial.printf("\"move_speed\": %.2f", target.dop_index * RANGE_STEP);
+          Serial.printf("\"move_speed\": %.2f", target.dop_index * 100);
           Serial.print("}");
     
           // Add comma if not the last item

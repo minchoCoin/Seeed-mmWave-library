@@ -37,7 +37,7 @@ void loop() {
             Serial.printf("  z_point: %.2f\n", target.z_point);
             Serial.printf("  dop_index: %d\n", target.dop_index);
             Serial.printf("  cluster_index: %d\n", target.cluster_index);
-            Serial.printf("  move_speed: %.2f cm/s\n", target.dop_index * RANGE_STEP);
+            Serial.printf("  move_speed: %.2f cm/s\n", target.dop_index * 100);
         }
     }
     // delay(500);

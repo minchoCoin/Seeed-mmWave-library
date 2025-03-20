@@ -55,7 +55,7 @@ void loop() {
         Serial.printf("  dop_index: %f\n", target.dop_index);
         Serial.printf("  cluster_index: %f\n", target.cluster_index);
         Serial.printf("  move_speed: %.2f cm/s\n",
-                      target.dop_index * RANGE_STEP);
+                      target.dop_index * 100);
       }
     }
   }

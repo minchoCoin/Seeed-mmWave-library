@@ -97,7 +97,7 @@ If you'd like to watch the debug info, Set _MMWAVE_DEBUG to 1 in SeeedmmWave.h
 ```
 
 ### How to get PointCloudChart
-1. Flash ESP32C6 with PointCloudChart_demo\PointCloudChart_demo_ino\PointCloudChart_demo_ino.ino
+1. Flash PointCloudChart_demo\PointCloudChart_demo_ino\PointCloudChart_demo_ino.ino to ESP32C6
 2. Python requirements: pyserial, numpy, matplotlib, mpl_toolkits
 3. run python code: PointCloudChart_demoPointCloudChart_realtime.py (for realtime and save fig) or PointCloudChart_demoPointCloudChart.py (for only save fig)
 

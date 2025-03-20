@@ -96,6 +96,10 @@ If you'd like to watch the debug info, Set _MMWAVE_DEBUG to 1 in SeeedmmWave.h
 ...
 ```
 
+### How to get PointCloudChart
+1. Flash ESP32C6 with PointCloudChart_demo\PointCloudChart_demo_ino\PointCloudChart_demo_ino.ino
+2. Python requirements: pyserial, numpy, matplotlib, mpl_toolkits
+3. run python code: PointCloudChart_demoPointCloudChart_realtime.py (for realtime and save fig) or PointCloudChart_demoPointCloudChart.py (for only save fig)
 
 ### PointCloudChart Demo video and sample
 - [https://youtu.be/nghvNvRgPC0](https://youtu.be/nghvNvRgPC0)
@@ -121,3 +125,7 @@ Contributions to the library are welcome. Please follow the standard pull reques
 - [Getting started with 60GHz mmWave Fall Detection Sensor Kit with XIAO ESP32C6 (MR60FDA2)](https://wiki.seeedstudio.com/getting_started_with_mr60fda2_mmwave_kit/)
 
 - [Getting started with 60GHz mmWave Breathing and Heartbeat Detection Sensor Kit with XIAO ESP32C6 (MR60BHA2)](https://wiki.seeedstudio.com/getting_started_with_mr60bha2_mmwave_kit/)
+
+- [https://github.com/Love4yzp/Seeed-mmWave-library](https://github.com/Love4yzp/Seeed-mmWave-library)
+
+- [MR60BHA2 Tiny Frame Interface Manual](https://wiki.seeedstudio.com/getting_started_with_mr60bha2_mmwave_kit/#resources)

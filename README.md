@@ -39,6 +39,11 @@ To begin using the library, include it in your Arduino sketch and refer to the e
 
 - **ReadLuxValue:** Shows how to read lux (light intensity) values from the onboard light sensor. It demonstrates sensor initialization, reading, and printing lux values.
 
+- **PeopleCounting:** Illustrates how to use the MR60BHA2 sensor for counting people
+
+- **PointCloud:** Illustrates how to use the MR60FDA2 sensor for getting point cloud
+
+- **gui_firmware:** ESP32C6 firmware for using [GUI Software](https://wiki.seeedstudio.com/getting_started_with_mr60fda2_mmwave_kit/#resources)
 ## API Reference
 
 Please refer to the comments in the source code for detailed information on the available methods and parameters.
@@ -49,3 +54,8 @@ This library is released under the [MIT License](https://github.com/love4yzp/See
 
 ## Contributing
 Contributions to the library are welcome. Please follow the standard pull request process to suggest improvements or add new features.
+
+# References
+- [Getting started with 60GHz mmWave Fall Detection Sensor Kit with XIAO ESP32C6 (MR60FDA2)](https://wiki.seeedstudio.com/getting_started_with_mr60fda2_mmwave_kit/)
+
+- [Getting started with 60GHz mmWave Breathing and Heartbeat Detection Sensor Kit with XIAO ESP32C6 (MR60BHA2)](https://wiki.seeedstudio.com/getting_started_with_mr60bha2_mmwave_kit/)

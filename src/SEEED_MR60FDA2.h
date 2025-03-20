@@ -43,6 +43,8 @@ class SEEED_MR60FDA2 : public SeeedmmWave {
   float _rect_ZF;
   float _rect_ZB;
 
+
+
   /*set height*/
   bool _isHeightValid = false;
   bool _isThresholdValid;    // 0 : Failed to obtain  1 : acquisition successful

@@ -5,7 +5,7 @@
 typedef struct TargetN {
   float x_point;
   float y_point;
-  int32_t dop_index;
+  float dop_index;
   int32_t cluster_index;
 } TargetN;
 

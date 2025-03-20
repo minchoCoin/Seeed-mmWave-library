@@ -166,6 +166,8 @@ bool SEEED_MR60BHA2::getPeopleCountingTartgetInfo(PeopleCounting& target_info) {
   return true;
 }
 
+
+
 bool SEEED_MR60BHA2::isHumanDetected() {
   if (!_isHumanDetectionValid)
     return false;

@@ -239,13 +239,16 @@ bool SEEED_MR60FDA2::getFall() {
  * @retval false No human is detected.
  */
 bool SEEED_MR60FDA2::getHuman(bool &is_human) {
-  // if (!_isHumanValid)
-  //   return false;
-  // _isHumanValid = false;
+   if (!_isHumanValid)
+     return false;
+  _isHumanValid = false;
   is_human = _isHuman;
   return is_human;
 }
 bool SEEED_MR60FDA2::getHuman() {
+  if (!_isHumanValid)
+     return false;
+  _isHumanValid = false;
   return _isHuman;
 }
 
@@ -305,27 +308,31 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
     case TypeFallDetection::FallSensitivity:
       _isSensitivityValid = *(const uint8_t*)data;
       break;
+
+      
     case TypeFallDetection::Report3DPointCloudDetection: {
-        size_t target_num = extractU32(data);  // Extract target quantity
+        int32_t target_num = (int32_t)extractI32(data);  // Extract target quantity
         data += sizeof(uint32_t);
-  
+
         std::vector<TargetN> received_targets; // Used to store parsed target data
         received_targets.reserve(target_num);
   
         for(size_t i = 0; i < target_num; i++)
         {
           TargetN target;
+          target.cluster_index = extractI32(data);
+          data += sizeof(int32_t);
+
           target.x_point = extractFloat(data);
           data += sizeof(float);
   
           target.y_point = extractFloat(data);
           data += sizeof(float);
   
-          target.dop_index = extractU32(data);
-          data += sizeof(int32_t);
+          target.dop_index = extractFloat(data);
+          data += sizeof(float);
   
-          target.cluster_index = extractU32(data);
-          data += sizeof(int32_t);
+          
   
           received_targets.push_back(target); // Add the resolved target to the container
         }
@@ -338,26 +345,28 @@ bool SEEED_MR60FDA2::handleType(uint16_t _type, const uint8_t* data,
       }
 
       case TypeFallDetection::Report3DPointCloudTartgetInfo: {
-        size_t target_num = extractU32(data);  // Extract target quantity
+        int32_t target_num = (int32_t)extractI32(data);  // Extract target quantity
         data += sizeof(uint32_t);
-  
+
         std::vector<TargetN> received_targets; // Used to store parsed target data
         received_targets.reserve(target_num);
   
         for(size_t i = 0; i < target_num; i++)
         {
           TargetN target;
+          target.cluster_index = extractI32(data);
+          data += sizeof(int32_t);
+
           target.x_point = extractFloat(data);
           data += sizeof(float);
   
           target.y_point = extractFloat(data);
           data += sizeof(float);
   
-          target.dop_index = extractU32(data);
-          data += sizeof(int32_t);
+          target.dop_index = extractFloat(data);
+          data += sizeof(float);
   
-          target.cluster_index = extractU32(data);
-          data += sizeof(int32_t);
+          
   
           received_targets.push_back(target); // Add the resolved target to the container
         }

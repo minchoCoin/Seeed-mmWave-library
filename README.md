@@ -108,7 +108,7 @@ If you'd like to watch the debug info, Set _MMWAVE_DEBUG to 1 in SeeedmmWave.h
 Please see PointCloudChart_demo_ino.ino and PointCloudChart_realtime.py
 
 
-![image](https://github.com/minchoCoin/Seeed-mmWave-library/blob/main/PointCloudChart_demo/PointCloudChartPNG/3D%20Point%20Cloud%20-%209.png)
+![image](https://github.com/minchoCoin/Seeed-mmWave-library/blob/main/PointCloudChart_demo/PointCloudChartPNG/3D%20Point%20Cloud%20-%208%20(7043ms).png)
 
 ## API Reference
 

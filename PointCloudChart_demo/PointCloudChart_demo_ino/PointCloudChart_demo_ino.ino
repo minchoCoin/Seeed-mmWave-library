@@ -42,7 +42,9 @@ void loop() {
     PeopleCounting target_info;
     if (mmWave.getPeopleCountingPointCloud(target_info)) {
       if (target_info.targets.size()>0){
-        Serial.print("{\"targets\": [");
+        Serial.print("{\"timestamp\": ");
+        Serial.print(millis());
+        Serial.print(", \"targets\": [");
         for (size_t i = 0; i < target_info.targets.size(); i++) {
           const auto& target = target_info.targets[i];
     

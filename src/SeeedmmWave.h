@@ -55,7 +55,7 @@
 
 #endif
 
-#define MMWaveMaxQueueSize 360
+#define MMWaveMaxQueueSize 2048
 
 class SeeedmmWave {
  private:

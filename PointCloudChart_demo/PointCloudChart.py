@@ -14,7 +14,7 @@ def visualize_targets_3d(json_data,n):
         data = json_data
 
     targets=data.get('targets',[])
-
+    timestamp = data.get('timestamp', None)
     if not targets:
         print('no targets...!')
         return
@@ -25,12 +25,14 @@ def visualize_targets_3d(json_data,n):
     speeds = [target['move_speed'] for target in targets]
     target_ids = [target['target_id'] for target in targets]
 
+    
+
     fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection='3d')
 
-    norm = Normalize(vmin=min(speeds), vmax=max(speeds))
+    #norm = Normalize(vmin=min(speeds), vmax=max(speeds))
     cmap = cm.plasma
-    colors = cmap(norm(speeds))
+    #colors = cmap(norm(speeds))
 
     scatter = ax.scatter(x_points, y_points, z_points, c=speeds, cmap=cmap, 
                          marker='o', alpha=0.8, edgecolors='w')
@@ -47,7 +49,7 @@ def visualize_targets_3d(json_data,n):
     ax.set_xlabel('X (m)')
     ax.set_ylabel('Y (m)')
     ax.set_zlabel('Z (m)')
-    ax.set_title(f'Point Cloud with Speed information - {n}')
+    ax.set_title(f'Point Cloud with Speed information - {n} ({timestamp}ms)')
 
      # grid
     ax.grid(True)
@@ -55,7 +57,7 @@ def visualize_targets_3d(json_data,n):
     # save
     plt.tight_layout()
     #plt.show()
-    plt.savefig(f'./PointCloudChartPNG/PointCloud {n}.png')
+    plt.savefig(f'./PointCloudChartPNG/PointCloud {n} ({timestamp}ms).png')
 
     
 def read_json_from_serial(port, baud_rate=115200):

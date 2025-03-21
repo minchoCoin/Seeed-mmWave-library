@@ -19,9 +19,9 @@ def animate_targets_3d(serial_reader):
     """
     fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection='3d')
-    
+    norm = Normalize(vmin=-5, vmax=5)
     # 초기 산점도 (빈 데이터로 시작)
-    scatter = ax.scatter([], [], [], s=30, c=[], cmap=cm.magma, marker='o', alpha=0.8, edgecolors='w')
+    scatter = ax.scatter([], [], [], s=30, c=[], cmap=cm.magma, marker='o', alpha=0.8, edgecolors='w',norm=norm)
     
     # 컬러바 추가
     cbar = plt.colorbar(scatter, ax=ax, pad=0.1)
@@ -53,7 +53,7 @@ def animate_targets_3d(serial_reader):
         data = json.loads(json_data) if isinstance(json_data, str) else json_data
         print(data)
         targets = data.get('targets', [])
-        
+        timestamp = data.get('timestamp', None)
         if not targets:
             subtitle.set_text("No targets detected")
             return scatter,
@@ -74,13 +74,13 @@ def animate_targets_3d(serial_reader):
         scatter._offsets3d = (x_points, y_points, z_points)
         
         # 속도에 따른 색상 매핑
-        norm = Normalize(vmin=min(speeds), vmax=max(speeds))
+        #norm = Normalize(vmin=min(speeds), vmax=max(speeds))
         scatter.set_array(np.array(speeds))
         
         plot_num+=1
-        title_obj.set_text(f"3D Point Cloud - #{plot_num}")
+        title_obj.set_text(f"3D Point Cloud - #{plot_num} ({timestamp}ms)")
         
-        fig.savefig(f"./PointCloudChartPNG/3D Point Cloud - {plot_num}.png",dpi=300,bbox_inches='tight')
+        fig.savefig(f"./PointCloudChartPNG/3D Point Cloud - {plot_num} ({timestamp}ms).png",dpi=300,bbox_inches='tight')
         
         # ID 라벨 업데이트
        # for i, txt in enumerate(target_ids):

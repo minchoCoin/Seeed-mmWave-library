@@ -105,7 +105,7 @@ If you'd like to watch the debug info, Set _MMWAVE_DEBUG to 1 in SeeedmmWave.h
 - [https://youtu.be/nghvNvRgPC0](https://youtu.be/nghvNvRgPC0)
 - [https://youtube.com/shorts/jPIVUtv3SSc?feature=share](https://youtube.com/shorts/jPIVUtv3SSc?feature=share)
 
-Please see PointCloudChart_demo_ino.ino and PointCloudChart_realtime.py
+Please see PointCloudChart_demo_ino.ino, PointCloudChart_realtime.py and PointCloud2dChart_realtime.py
 
 
 ![image](https://github.com/minchoCoin/Seeed-mmWave-library/blob/main/PointCloudChart_demo/PointCloudChartPNG/3D%20Point%20Cloud%20-%208%20(7043ms).png)

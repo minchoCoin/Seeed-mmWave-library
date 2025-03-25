@@ -65,8 +65,12 @@ def animate_targets_2d(serial_reader):
         if not json_data:
             return scatter_xy, scatter_yz, scatter_xz
         
-        data = json.loads(json_data) if isinstance(json_data, str) else json_data
-        print(data)
+        try:
+            data = json.loads(json_data) if isinstance(json_data, str) else json_data
+            print(data)
+        except json.JSONDecodeError:
+            print("Invalid JSON received. continued...")
+            return scatter_xy, scatter_yz, scatter_xz
         targets = data.get('targets', [])
         timestamp = data.get('timestamp', None)
         

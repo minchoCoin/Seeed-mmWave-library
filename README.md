@@ -109,7 +109,7 @@ Please see PointCloudChart_demo_ino.ino, PointCloudChart_realtime.py and PointCl
 
 
 ![image](https://github.com/minchoCoin/Seeed-mmWave-library/blob/main/PointCloudChart_demo/PointCloudChartPNG/3D%20Point%20Cloud%20-%208%20(7043ms).png)
-
+![image](https://github.com/minchoCoin/Seeed-mmWave-library/blob/main/PointCloudChart_demo/PointCloud2dChartPNG/2D_Projections_10_81834ms.png)
 ## API Reference
 
 Please refer to the comments in the source code for detailed information on the available methods and parameters.

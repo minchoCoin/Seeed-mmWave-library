@@ -105,7 +105,7 @@ If you'd like to watch the debug info, Set _MMWAVE_DEBUG to 1 in SeeedmmWave.h
 Please check PointCloud2dChart_realtime.py
 
 - [https://youtu.be/Qch8UH9Cx8o](https://youtu.be/Qch8UH9Cx8o)
-- [https://youtu.be/GKeO21cksN0](https://youtu.be/GKeO21cksN0)
+- [https://youtu.be/RkQD-PtAQsE](https://youtu.be/RkQD-PtAQsE)
 
 ### PointCloudChart (xyz 3d) Demo video and sample
 - [https://youtu.be/nghvNvRgPC0](https://youtu.be/nghvNvRgPC0)
